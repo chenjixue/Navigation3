@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("plugins")
     repositories {
         google {
             content {
@@ -24,7 +25,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Navigation3"
 include(":app")
-include(":foryou")
-include(":forhe")
-include(":forit")
-include(":navigation")
+include(":feature:foryou")
+include(":feature:forhe")
+include(":feature:forit")
+include(":core:navigation")

@@ -2,12 +2,12 @@ package com.example.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.example.forhe.ForHeNavKey
-import com.example.forhe.ForHeScreen
+import com.example.forit.ForItNavKey
+import com.example.forit.ForItScreen
 
-fun EntryProviderScope<NavKey>.forHeEntry(navigator: Navigator) {
-    entry<ForHeNavKey> {
-        ForHeScreen(
+fun EntryProviderScope<NavKey>.forItEntry() {
+    entry<ForItNavKey> {
+        ForItScreen(
 //            onTopicClick = navigator::navigateToTopic,
         )
     }

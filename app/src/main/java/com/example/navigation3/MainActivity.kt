@@ -70,9 +70,9 @@ internal fun NiaApp(
     ) {
 //        val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
         val entryProvider = entryProvider {
-            forYouEntry(navigator)
-            forHeEntry(navigator)
-            forItEntry(navigator)
+            forYouEntry()
+            forHeEntry()
+            forItEntry()
 //            bookmarksEntry(navigator)
 //            interestsEntry(navigator)
 //            topicEntry(navigator)
