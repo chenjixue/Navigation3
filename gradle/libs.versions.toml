@@ -27,9 +27,11 @@ spotless = "8.3.0"
 uiTestJunit4 = "1.9.0-rc01"
 truth = "1.4.4"
 androidxLintGradle = "1.0.0-alpha03"
+androidDesugarJdkLibs = "2.1.4"
 
 [libraries]
 androidx-lint-gradle = { group = "androidx.lint", name = "lint-gradle", version.ref = "androidxLintGradle" }
+android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -44,6 +46,7 @@ androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graph
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -78,3 +81,8 @@ android-lint = { id = "com.android.lint", version.ref = "androidGradlePlugin" }
 
 #Custom Plugins
 customplugin-hilt = { id = "customplugin.hilt" }
+customplugin-jvm-library = { id = "customplugin.jvm.library" }
+customplugin-android-application = { id = "customplugin.android.application" }
+customplugin-android-application-compose = { id = "customplugin.android.application.compose" }
+customplugin-android-library = { id = "customplugin.android.library" }
+customplugin-android-library-compose = { id = "customplugin.android.library.compose" }

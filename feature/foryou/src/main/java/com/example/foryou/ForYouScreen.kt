@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.example.ui.NewsFeedUiState
+
 //import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -15,8 +17,15 @@ fun ForYouScreen() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Greeting("foryou")
+        ForYouScreen("test")
     }
+}
+
+@Composable
+internal fun ForYouScreen(
+    feedState: String,
+) {
+    Greeting("foryou")
 }
 
 @Composable

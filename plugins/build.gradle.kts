@@ -21,7 +21,7 @@ plugins {
     alias(libs.plugins.android.lint)
 }
 
-group = "com.google.samples.apps.nowinandroid.buildlogic"
+group = "com.example.plugins"
 
 // Configure the build-logic plugins to target JDK 17
 // This matches the JDK used to build the project, and is not related to what is running on device.
@@ -62,6 +62,31 @@ gradlePlugin {
         register("hilt") {
             id = libs.plugins.customplugin.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"
+        }
+        register("jvmLibrary") {
+            id = libs.plugins.customplugin.jvm.library.get().pluginId
+            implementationClass = "JvmLibraryConventionPlugin"
+        }
+
+        // 插件3
+        register("androidApplication") {
+            id = libs.plugins.customplugin.android.application.asProvider().get().pluginId
+            implementationClass = "AndroidApplicationConventionPlugin"
+        }
+
+        // 插件4
+        register("androidApplicationCompose") {
+            id = libs.plugins.customplugin.android.application.compose.get().pluginId
+            implementationClass = "AndroidApplicationComposeConventionPlugin"
+        }
+
+        register("androidLibraryCompose") {
+            id = libs.plugins.customplugin.android.library.compose.get().pluginId
+            implementationClass = "AndroidLibraryComposeConventionPlugin"
+        }
+        register("androidLibrary") {
+            id = libs.plugins.customplugin.android.library.asProvider().get().pluginId
+            implementationClass = "AndroidLibraryConventionPlugin"
         }
     }
 }
