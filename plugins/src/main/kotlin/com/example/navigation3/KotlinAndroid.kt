@@ -42,6 +42,10 @@ internal fun Project.configureKotlinAndroid(
     }
 
     configureKotlin<KotlinAndroidProjectExtension>()
+
+    dependencies {
+        "coreLibraryDesugaring"(libs.findLibrary("android.desugarJdkLibs").get())
+    }
 }
 
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() = configure<T> {
@@ -61,8 +65,5 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() =
         freeCompilerArgs.add(
             "-Xconsistent-data-class-copy-visibility",
         )
-    }
-    dependencies {
-        "coreLibraryDesugaring"(libs.findLibrary("android.desugarJdkLibs").get())
     }
 }

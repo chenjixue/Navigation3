@@ -10,9 +10,6 @@ abstract class JvmLibraryConventionPlugin : Plugin<Project> {
         with(target) {
             apply(plugin = "org.jetbrains.kotlin.jvm")
             configureKotlinJvm()
-            dependencies {
-                "testImplementation"(libs.findLibrary("kotlin.test").get())
-            }
         }
     }
 }

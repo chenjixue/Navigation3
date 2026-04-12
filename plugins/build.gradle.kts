@@ -68,13 +68,11 @@ gradlePlugin {
             implementationClass = "JvmLibraryConventionPlugin"
         }
 
-        // 插件3
         register("androidApplication") {
             id = libs.plugins.customplugin.android.application.asProvider().get().pluginId
             implementationClass = "AndroidApplicationConventionPlugin"
         }
 
-        // 插件4
         register("androidApplicationCompose") {
             id = libs.plugins.customplugin.android.application.compose.get().pluginId
             implementationClass = "AndroidApplicationComposeConventionPlugin"
@@ -87,6 +85,10 @@ gradlePlugin {
         register("androidLibrary") {
             id = libs.plugins.customplugin.android.library.asProvider().get().pluginId
             implementationClass = "AndroidLibraryConventionPlugin"
+        }
+        register("androidFeatureImpl") {
+            id = libs.plugins.customplugin.android.feature.impl.get().pluginId
+            implementationClass = "AndroidFeatureImplConventionPlugin"
         }
     }
 }

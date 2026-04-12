@@ -1,7 +1,7 @@
 
-//plugins {
-//    alias(libs.plugins.nowinandroid.jvm.library)
-//}
+plugins {
+    alias(libs.plugins.customplugin.jvm.library)
+}
 
 //dependencies {
 //    api(libs.kotlinx.datetime)
