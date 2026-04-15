@@ -1,17 +1,14 @@
 plugins {
     alias(libs.plugins.customplugin.android.library)
     alias(libs.plugins.customplugin.android.library.compose)
+    alias(libs.plugins.customplugin.android.room)
     alias(libs.plugins.customplugin.hilt)
 }
 
 android {
-    namespace = "com.example.data.repository"
+    namespace = "com.example.core.database"
 }
-
 
 dependencies {
     api(project(":core:model"))
-    api(project(":core:datastore-proto"))
-    api(project(":core:database"))
-    implementation(project(":core:network"))
 }

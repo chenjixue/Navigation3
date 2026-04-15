@@ -44,7 +44,7 @@ dependencies {
 //    compileOnly(libs.firebase.performance.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
-//    compileOnly(libs.room.gradlePlugin)
+    compileOnly(libs.room.gradlePlugin)
 //    compileOnly(libs.spotless.gradlePlugin)
 //    implementation(libs.truth)
 //    lintChecks(libs.androidx.lint.gradle)
@@ -59,6 +59,10 @@ tasks {
 
 gradlePlugin {
     plugins {
+        register("androidRoom") {
+            id = libs.plugins.customplugin.android.room.get().pluginId
+            implementationClass = "AndroidRoomConventionPlugin"
+        }
         register("hilt") {
             id = libs.plugins.customplugin.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"

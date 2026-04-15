@@ -1,8 +1,7 @@
 plugins {
-//    alias(libs.plugins.android.application)
-//    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.customplugin.android.application)
     alias(libs.plugins.customplugin.android.application.compose)
+    alias(libs.plugins.customplugin.hilt)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -43,6 +42,8 @@ android {
 }
 
 dependencies {
+
+    ksp(libs.hilt.compiler)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

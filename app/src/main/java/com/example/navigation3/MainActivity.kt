@@ -27,12 +27,26 @@ import androidx.navigation3.runtime.entryProvider
 import com.example.navigation.TOP_LEVEL_NAV_ITEMS
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.navigation3.runtime.NavKey
 import com.example.navigation.Navigator
 import com.example.navigation.toEntries
 import com.example.navigation.forYouEntry
 import com.example.navigation.forHeEntry
 import com.example.navigation.forItEntry
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            Navigation3Theme {
+                NiaApp()
+            }
+        }
+    }
+}
 
 @Composable
 internal fun NiaApp(
@@ -86,15 +100,6 @@ internal fun NiaApp(
         )
     }
 }
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Navigation3Theme {
-                NiaApp()
-            }
-        }
-    }
-}
+
+
 
