@@ -1,6 +1,9 @@
 package com.example.ui
 
+import com.example.model.UserNewsResource
+
 sealed interface NewsFeedUiState {
+
     /**
      * The feed is still loading.
      */
@@ -13,6 +16,6 @@ sealed interface NewsFeedUiState {
         /**
          * The list of news resources contained in this feed.
          */
-        val feed: List<String>,
+        val feed: List<UserNewsResource>,
     ) : NewsFeedUiState
 }

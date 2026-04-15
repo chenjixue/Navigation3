@@ -18,6 +18,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     api(project(":core:ui"))
+    api(project(":core:data"))
+    api(project(":core:network"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

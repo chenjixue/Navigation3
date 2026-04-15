@@ -1,8 +1,7 @@
-
 plugins {
     alias(libs.plugins.customplugin.jvm.library)
 }
 
-//dependencies {
-//    api(libs.kotlinx.datetime)
-//}
+dependencies {
+    api(libs.androidx.dataStore)
+}
