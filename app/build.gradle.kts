@@ -62,7 +62,7 @@ dependencies {
     implementation(project(":feature:foryou"))
     implementation(project(":feature:forhe"))
     implementation(project(":feature:forit"))
-//    implementation(project(":sync"))
+    implementation(project(":sync"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
