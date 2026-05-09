@@ -22,7 +22,7 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
 import com.example.network.Dispatcher
 import com.example.network.NiaDispatchers.IO
-import com.example.data.datastore.UserPreferences
+import com.example.data.store.UserPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

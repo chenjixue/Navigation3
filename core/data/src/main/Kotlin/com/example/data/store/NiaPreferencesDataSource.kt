@@ -1,29 +1,14 @@
-/*
- * Copyright 2022 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.data.store
 
 import android.util.Log
 import androidx.datastore.core.DataStore
-import com.example.data.datastore.UserPreferences
+import com.example.data.store.UserPreferences
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
 import com.example.model.UserData
+import kotlin.collections.remove
 
 
 class NiaPreferencesDataSource @Inject constructor(
@@ -37,4 +22,41 @@ class NiaPreferencesDataSource @Inject constructor(
             )
         }
 
+    suspend fun updateChangeListVersion(update: ChangeListVersions.() -> ChangeListVersions) {
+        try {
+            // 升级数据版本
+            userPreferences.updateData { currentPreferences ->
+                val updatedChangeListVersions = update(
+                    ChangeListVersions(
+                        topicVersion = currentPreferences.topicChangeListVersion,
+                        newsResourceVersion = currentPreferences.newsResourceChangeListVersion,
+                    ),
+                )
+
+                 /* 生成一个新的UserPreferences对象,
+                UserPreferences,一般通过 toBuilder() 获取一个基于当前数据拷贝的可变 Builder 对象, 调用 Builder 的 set 方法修改数据 
+               再调用 build() 生成一个全新的、不可变的 UserPreferences 对象,但是kotlin用一个扩展函数copy方法封装了上述流程,但本质还是一样 */
+                currentPreferences.copy {
+                    topicChangeListVersion = updatedChangeListVersions.topicVersion
+                    newsResourceChangeListVersion = updatedChangeListVersions.newsResourceVersion
+                }
+            }
+        } catch (ioException: IOException) {
+            Log.e("NiaPreferences", "Failed to update user preferences", ioException)
+        }
+    }
+
+    suspend fun setNewsResourcesViewed(newsResourceIds: List<String>, viewed: Boolean) {
+        userPreferences.updateData { prefs ->
+            prefs.copy {
+                newsResourceIds.forEach { id ->
+                    if (viewed) {
+                        viewedNewsResourceIds.put(id, true)
+                    } else {
+                        viewedNewsResourceIds.remove(id)
+                    }
+                }
+            }
+        }
+    }
 }

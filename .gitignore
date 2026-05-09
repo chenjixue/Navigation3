@@ -8,6 +8,10 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
+.idea/compiler.xml
+.idea/gradle.xml
+AGENT.md
+AGENTS.md
 
 build/
 /captures

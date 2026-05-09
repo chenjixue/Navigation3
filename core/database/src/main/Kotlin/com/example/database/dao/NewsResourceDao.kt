@@ -18,6 +18,7 @@ package com.example.database.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import com.example.database.model.NewsResourceEntity
 import com.example.database.model.PopulatedNewsResource
 import com.example.model.NewsResource
@@ -60,5 +61,14 @@ interface NewsResourceDao {
         filterNewsIds: Set<String> = emptySet(),
     ): Flow<List<PopulatedNewsResource>>
 
+    @Upsert
+    suspend fun upsertNewsResources(newsResourceEntities: List<NewsResourceEntity>)
 
+    @Query(
+        value = """
+            DELETE FROM news_resources
+            WHERE id in (:ids)
+        """,
+    )
+    suspend fun deleteNewsResources(ids: List<String>)
 }

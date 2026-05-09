@@ -1,13 +1,41 @@
+import java.io.StringReader
+import java.util.Properties
+import com.android.build.api.variant.BuildConfigField
+
 plugins {
     alias(libs.plugins.customplugin.android.library)
     alias(libs.plugins.customplugin.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+    }
     namespace = "com.example.network"
 }
+dependencies {
+    api(project(":core:model"))
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.kotlin.serialization)
+}
+
+val backendUrl = providers.fileContents(
+    isolated.rootProject.projectDirectory.file("local.properties")
+).asText.map { text ->
+    val properties = Properties()
+    properties.load(StringReader(text))
+    properties["BACKEND_URL"]
+}.orElse("http://example.com")
 
 
-//dependencies {
-//    api(project(":core:model"))
-//}
+androidComponents {
+    onVariants {
+        it.buildConfigFields!!.put("BACKEND_URL", backendUrl.map { value ->
+            BuildConfigField(type = "String", value = """"$value"""", comment = null)
+        })
+    }
+}
