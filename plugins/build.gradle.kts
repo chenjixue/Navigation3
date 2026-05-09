@@ -90,6 +90,10 @@ gradlePlugin {
             id = libs.plugins.customplugin.android.library.asProvider().get().pluginId
             implementationClass = "AndroidLibraryConventionPlugin"
         }
+        register("androidFlavors") {
+            id = libs.plugins.customplugin.android.application.flavors.get().pluginId
+            implementationClass = "AndroidApplicationFlavorsConventionPlugin"
+        }
         register("androidFeatureImpl") {
             id = libs.plugins.customplugin.android.feature.impl.get().pluginId
             implementationClass = "AndroidFeatureImplConventionPlugin"

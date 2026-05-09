@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import com.example.navigation3.configureFlavors
 
 abstract class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -17,6 +18,7 @@ abstract class AndroidLibraryConventionPlugin : Plugin<Project> {
                 lint.targetSdk = 36
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true
+                configureFlavors(this)
 //                configureGradleManagedDevices(this)
                 // The resource prefix is derived from the module name,
                 // so resources inside ":core:module1" must be prefixed with "core_module1_"
