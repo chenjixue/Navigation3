@@ -15,6 +15,7 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
+import com.example.network.DemoAssetManager
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -25,6 +26,12 @@ internal object NetworkModule {
     fun providesNetworkJson(): Json = Json {
         ignoreUnknownKeys = true
     }
+
+    @Provides
+    @Singleton
+    fun providesDemoAssetManager(
+        @ApplicationContext context: Context,
+    ): DemoAssetManager = DemoAssetManager(context.assets::open)
 
     @Provides
     @Singleton

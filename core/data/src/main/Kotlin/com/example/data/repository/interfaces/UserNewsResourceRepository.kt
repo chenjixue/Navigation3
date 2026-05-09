@@ -4,7 +4,7 @@ import com.example.model.UserNewsResource
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Data layer implementation for [com.example.model.UserNewsResource]
+ * Data layer implementation for [UserNewsResource]
  */
 interface UserNewsResourceRepository {
     fun observeAll(

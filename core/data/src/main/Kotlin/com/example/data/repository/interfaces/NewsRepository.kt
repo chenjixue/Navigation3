@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 /**
- * Encapsulation class for query parameters for [com.example.model.NewsResource]
+ * Encapsulation class for query parameters for [NewsResource]
  */
 data class NewsResourceQuery(
     /**
@@ -20,7 +20,7 @@ data class NewsResourceQuery(
 )
 
 /**
- * Data layer implementation for [com.example.model.NewsResource]
+ * Data layer implementation for [NewsResource]
  */
 interface NewsRepository : Syncable {
     /**
