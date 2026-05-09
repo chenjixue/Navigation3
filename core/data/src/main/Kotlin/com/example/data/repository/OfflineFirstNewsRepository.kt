@@ -1,4 +1,4 @@
-package com.example.data.repository.interfaces
+package com.example.data.repository
 
 import com.example.data.Synchronizer
 import com.example.database.dao.NewsResourceDao

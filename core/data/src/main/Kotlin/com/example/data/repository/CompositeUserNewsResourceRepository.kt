@@ -1,9 +1,5 @@
 package com.example.data.repository
 
-import com.example.data.repository.interfaces.NewsRepository
-import com.example.data.repository.interfaces.NewsResourceQuery
-import com.example.data.repository.interfaces.UserDataRepository
-import com.example.data.repository.interfaces.UserNewsResourceRepository
 import com.example.model.NewsResource
 import com.example.model.UserData
 import com.example.model.UserNewsResource

@@ -4,10 +4,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.example.data.repository.interfaces.OfflineFirstUserDataRepository
-import com.example.data.repository.interfaces.UserDataRepository
-import com.example.data.repository.interfaces.NewsRepository
-import com.example.data.repository.interfaces.OfflineFirstNewsRepository
+import com.example.data.repository.OfflineFirstUserDataRepository
+import com.example.data.repository.UserDataRepository
+import com.example.data.repository.NewsRepository
+import com.example.data.repository.OfflineFirstNewsRepository
 
 @Module
 @InstallIn(SingletonComponent::class)

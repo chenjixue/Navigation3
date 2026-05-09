@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.data.repository.interfaces
+package com.example.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

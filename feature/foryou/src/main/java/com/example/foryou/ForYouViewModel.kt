@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import com.example.ui.NewsFeedUiState
-import com.example.data.repository.interfaces.UserDataRepository
-import com.example.data.repository.interfaces.UserNewsResourceRepository
+import com.example.data.repository.UserDataRepository
+import com.example.data.repository.UserNewsResourceRepository
 
 @HiltViewModel
 class ForYouViewModel @Inject constructor(

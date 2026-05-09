@@ -1,7 +1,7 @@
 package com.example.data.di
 
 import com.example.data.repository.CompositeUserNewsResourceRepository
-import com.example.data.repository.interfaces.UserNewsResourceRepository
+import com.example.data.repository.UserNewsResourceRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
