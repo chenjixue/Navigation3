@@ -22,10 +22,16 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import com.example.database.dao.NewsResourceDao
+import com.example.database.dao.TopicDao
 
 @Module
 @InstallIn(SingletonComponent::class)
 internal object DaosModule {
+
+    @Provides
+    fun providesTopicsDao(
+        database: NiaDatabase,
+    ): TopicDao = database.topicDao()
 
     @Provides
     fun providesNewsResourceDao(

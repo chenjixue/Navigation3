@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.database.dao.NewsResourceDao
+import com.example.database.dao.TopicDao
 import com.example.database.model.NewsResourceEntity
 import com.example.database.model.NewsResourceTopicCrossRef
 import com.example.database.model.TopicEntity
@@ -22,5 +23,6 @@ import com.example.database.model.TopicEntity
 
 
 internal abstract class NiaDatabase : RoomDatabase() {
+    abstract fun topicDao(): TopicDao
     abstract fun newsResourceDao(): NewsResourceDao
 }

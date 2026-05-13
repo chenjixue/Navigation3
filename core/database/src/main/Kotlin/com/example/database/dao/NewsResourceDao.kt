@@ -51,7 +51,6 @@ interface NewsResourceDao {
                         )
                     ELSE 1
                 END
-            ORDER BY publish_date DESC
     """,
     )
     fun getNewsResources(

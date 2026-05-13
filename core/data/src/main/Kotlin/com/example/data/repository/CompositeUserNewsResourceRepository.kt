@@ -32,11 +32,10 @@ class CompositeUserNewsResourceRepository @Inject constructor(
     override fun observeAllForFollowedTopics(): Flow<List<UserNewsResource>> =
         userDataRepository.userData.map { it.followedTopics }.distinctUntilChanged()
             .flatMapLatest { followedTopics ->
-                flowOf(emptyList())
-//                when {
-//                    followedTopics.isEmpty() -> flowOf(emptyList())
-//                    else -> observeAll(NewsResourceQuery(filterTopicIds = followedTopics))
-//                }
+                when {
+                    followedTopics.isEmpty() -> flowOf(emptyList())
+                    else -> observeAll(NewsResourceQuery(filterTopicIds = followedTopics))
+                }
             }
 
 }

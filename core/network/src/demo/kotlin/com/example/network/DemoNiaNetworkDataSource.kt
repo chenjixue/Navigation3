@@ -12,7 +12,7 @@ import java.io.BufferedReader
 import javax.inject.Inject
 import com.example.network.model.NetworkChangeList
 import com.example.network.model.NetworkNewsResource
-
+import com.example.network.model.NetworkTopic
 
 
 
@@ -26,9 +26,14 @@ class DemoNiaNetworkDataSource @Inject constructor(
     private val assets: DemoAssetManager,
 ) : NiaNetworkDataSource {
 
+    override suspend fun getTopics(ids: List<String>?): List<NetworkTopic> =
+        getDataFromJsonFile(TOPICS_ASSET)
 
     override suspend fun getNewsResources(ids: List<String>?): List<NetworkNewsResource> =
         getDataFromJsonFile(NEWS_ASSET)
+
+    override suspend fun getTopicChangeList(after: Int?): List<NetworkChangeList> =
+        getTopics().mapToChangeList(NetworkTopic::id)
 
     override suspend fun getNewsResourceChangeList(after: Int?): List<NetworkChangeList> =
         getNewsResources().mapToChangeList(NetworkNewsResource::id)
@@ -56,7 +61,7 @@ class DemoNiaNetworkDataSource @Inject constructor(
 
     companion object {
         private const val NEWS_ASSET = "news.json"
-//        private const val TOPICS_ASSET = "topics.json"
+        private const val TOPICS_ASSET = "topics.json"
     }
 }
 

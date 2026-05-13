@@ -17,10 +17,37 @@ class NiaPreferencesDataSource @Inject constructor(
     val userData = userPreferences.data
         .map {
             UserData(
-                null,
-                null
+                viewedNewsResources = it.viewedNewsResourceIdsMap.keys,
+                followedTopics = it.followedTopicIdsMap.keys,
+                shouldHideOnboarding = it.shouldHideOnboarding,
             )
         }
+
+    suspend fun getChangeListVersions() = userPreferences.data
+        .map {
+            ChangeListVersions(
+                topicVersion = it.topicChangeListVersion,
+                newsResourceVersion = it.newsResourceChangeListVersion,
+            )
+        }
+        .firstOrNull() ?: ChangeListVersions()
+
+    suspend fun setTopicIdFollowed(topicId: String, followed: Boolean) {
+        try {
+            userPreferences.updateData {
+                it.copy {
+                    if (followed) {
+                        followedTopicIds.put(topicId, true)
+                    } else {
+                        followedTopicIds.remove(topicId)
+                    }
+                    updateShouldHideOnboardingIfNecessary()
+                }
+            }
+        } catch (ioException: IOException) {
+            Log.e("NiaPreferences", "Failed to update user preferences", ioException)
+        }
+    }
 
     suspend fun updateChangeListVersion(update: ChangeListVersions.() -> ChangeListVersions) {
         try {
@@ -58,5 +85,18 @@ class NiaPreferencesDataSource @Inject constructor(
                 }
             }
         }
+    }
+
+
+    suspend fun setShouldHideOnboarding(shouldHideOnboarding: Boolean) {
+        userPreferences.updateData {
+            it.copy { this.shouldHideOnboarding = shouldHideOnboarding }
+        }
+    }
+}
+
+private fun UserPreferencesKt.Dsl.updateShouldHideOnboardingIfNecessary() {
+    if (followedTopicIds.isEmpty() && followedAuthorIds.isEmpty()) {
+        shouldHideOnboarding = false
     }
 }

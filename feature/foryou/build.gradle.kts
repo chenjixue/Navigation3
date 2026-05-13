@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.customplugin.android.feature.impl)
+    alias(libs.plugins.customplugin.android.feature)
     alias(libs.plugins.customplugin.android.library.compose)
     alias(libs.plugins.kotlin.serialization)
 }
@@ -17,9 +17,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    api(project(":core:ui"))
-    api(project(":core:data"))
-    api(project(":core:network"))
+    implementation(libs.coil.kt.compose)
+//    api(project(":core:ui"))
+//    api(project(":core:data"))
+//    api(project(":core:network"))
+    api(project(":core:domain"))
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
