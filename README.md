@@ -7,8 +7,12 @@
 5.区分不同的编译环境  
 6.后台启动同步数据协程  
 7.添加生产环境真实网络请求和测试环境模拟网络请求  
-8.根据数据绘制foryou模块初版界面
+8.根据数据绘制foryou模块初版界面  
+9.临时屏蔽部分模块更改业务开发一款老人记账软件    
 
 ## 当前进度演示
-
-<img src="./doc/img.png" width="40%" height="40%"/>
+完整架构演示示例  
+<img src="./doc/img.png" width="40%" height="40%"/>  
+临时屏蔽部分模块更改业务开发一款老人记账软件  
+<img src="./doc/example1.jpg" width="40%" height="40%"/> <img src="./doc/example2.jpg" width="40%" height="40%"/>
+<img src="./doc/example3.jpg" width="40%" height="40%"/>
