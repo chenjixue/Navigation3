@@ -29,38 +29,24 @@ internal class SyncWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val niaPreferences: NiaPreferencesDataSource,
-    private val newsRepository: NewsRepository,
-    private val topicRepository: TopicsRepository,
+//    private val newsRepository: NewsRepository,
+//    private val topicRepository: TopicsRepository,
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
 ) : CoroutineWorker(appContext, workerParams), Synchronizer {
 
     override suspend fun doWork(): Result = withContext(ioDispatcher) {
 
-         val syncedSuccessfully = awaitAll(
-            async { topicRepository.sync() },
-             async { newsRepository.sync() }
-         ).all { it }
-//        val topicDeferred = async { topicRepository.sync() }
-//        val newsDeferred = async { newsRepository.sync() }
+//         val syncedSuccessfully = awaitAll(
+//            async { topicRepository.sync() },
+//             async { newsRepository.sync() }
+//         ).all { it }
 //
-//        val topicSyncSuccess = topicDeferred.await()
-//        val newsSyncSuccess = newsDeferred.await()
-//
-//        if (!topicSyncSuccess) {
-//            android.util.Log.e("SyncWorker", "Topic sync failed")
+//        if (syncedSuccessfully) {
+//            Result.success()
+//        } else {
+//            Result.retry()
 //        }
-//        if (!newsSyncSuccess) {
-//            android.util.Log.e("SyncWorker", "News sync failed")
-//        }
-
-//        val syncedSuccessfully = topicSyncSuccess && newsSyncSuccess
-
-        if (syncedSuccessfully) {
-//            searchContentsRepository.populateFtsData()
-            Result.success()
-        } else {
-            Result.retry()
-        }
+        Result.success()
     }
 
     override suspend fun getChangeListVersions(): ChangeListVersions =

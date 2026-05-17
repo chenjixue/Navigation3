@@ -17,25 +17,44 @@
 package com.example.database.di
 
 import com.example.database.NiaDatabase
+import com.example.database.dao.ChouhuResourceDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import com.example.database.dao.NewsResourceDao
+import com.example.database.dao.NoSaleResourceDao
+import com.example.database.dao.OtherExpenseResourceDao
+import com.example.database.dao.PeopleExpenseResourceDao
+import com.example.database.dao.SaleResourceDao
 import com.example.database.dao.TopicDao
 
 @Module
 @InstallIn(SingletonComponent::class)
 internal object DaosModule {
+    @Provides
+    fun providesChouhuDao(
+        database: NiaDatabase,
+    ): ChouhuResourceDao = database.chouhuResourceDao()
 
     @Provides
-    fun providesTopicsDao(
+    fun providesPeopleExpenseDao(
         database: NiaDatabase,
-    ): TopicDao = database.topicDao()
+    ): PeopleExpenseResourceDao = database.peopleExpenseResourceDao()
 
     @Provides
-    fun providesNewsResourceDao(
+    fun providesOtherExpenseDao(
         database: NiaDatabase,
-    ): NewsResourceDao = database.newsResourceDao()
+    ): OtherExpenseResourceDao = database.otherExpenseResourceDao()
+
+    @Provides
+    fun providesSaleExpenseDao(
+        database: NiaDatabase,
+    ): SaleResourceDao = database.saleResourceDao()
+
+    @Provides
+    fun providesNoSaleExpenseDao(
+        database: NiaDatabase,
+    ): NoSaleResourceDao = database.noSaleResourceDao()
 
 }

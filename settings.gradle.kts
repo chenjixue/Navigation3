@@ -23,8 +23,8 @@ dependencyResolutionManagement {
 rootProject.name = "Navigation3"
 include(":app")
 include(":core:datastore-proto")
-include(":feature:foryou")
-include(":feature:forhe")
+//include(":feature:foryou")
+//include(":feature:forhe")
 include(":feature:forit")
 include(":core:navigation")
 include(":core:model")

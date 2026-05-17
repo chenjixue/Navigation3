@@ -25,11 +25,11 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.navigation3.ui.theme.Navigation3Theme
 import com.example.navigation.NavigationState
 import com.example.navigation.rememberNavigationState
-import com.example.foryou.ForYouNavKey
+//import com.example.foryou.ForYouNavKey
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
-import com.example.forhe.ForHeNavKey
+//import com.example.forhe.ForHeNavKey
 import com.example.forit.ForItNavKey
 import androidx.navigation3.runtime.entryProvider
 import com.example.navigation.TOP_LEVEL_NAV_ITEMS
@@ -50,8 +50,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import androidx.navigation3.runtime.NavKey
 import com.example.navigation.Navigator
 import com.example.navigation.toEntries
-import com.example.navigation.forYouEntry
-import com.example.navigation.forHeEntry
+//import com.example.navigation.forYouEntry
+//import com.example.navigation.forHeEntry
 import com.example.navigation.forItEntry
 import kotlin.text.get
 
@@ -76,35 +76,35 @@ internal fun NiaApp(
     modifier: Modifier = Modifier,
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
-    val navigationState = rememberNavigationState(ForYouNavKey, TOP_LEVEL_NAV_ITEMS.keys)
+    val navigationState = rememberNavigationState(ForItNavKey, TOP_LEVEL_NAV_ITEMS.keys)
     val navigator = remember { Navigator(navigationState) }
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
-                val selected = navKey == navigationState.currentTopLevelKey
-                this.item(
-                    selected = selected,
-                    onClick = { navigator.navigate(navKey) },
-                    icon = {
-                        if (selected) {
-                            Icon(
-                                imageVector = navItem.selectedIcon,
-                                contentDescription = null,
-                            )
-                        } else {
-                            Icon(
-                                imageVector = navItem.unselectedIcon,
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                    label = { Text(stringResource(navItem.iconTextId)) },
-                    modifier = modifier
-                )
-            }
-        },
-        modifier = modifier,
-    ) {
+    // NavigationSuiteScaffold(
+    //     navigationSuiteItems = {
+    //         TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
+    //             val selected = navKey == navigationState.currentTopLevelKey
+    //             this.item(
+    //                 selected = selected,
+    //                 onClick = { navigator.navigate(navKey) },
+    //                 icon = {
+    //                     if (selected) {
+    //                         Icon(
+    //                             imageVector = navItem.selectedIcon,
+    //                             contentDescription = null,
+    //                         )
+    //                     } else {
+    //                         Icon(
+    //                             imageVector = navItem.unselectedIcon,
+    //                             contentDescription = null,
+    //                         )
+    //                     }
+    //                 },
+    //                 label = { Text(stringResource(navItem.iconTextId)) },
+    //                 modifier = modifier
+    //             )
+    //         }
+    //     },
+    //     modifier = modifier,
+    // ) {
 
         Box(
             modifier = modifier,
@@ -112,13 +112,15 @@ internal fun NiaApp(
             val destination = TOP_LEVEL_NAV_ITEMS[navigationState.currentTopLevelKey]
             
             Column {
-                CenterAlignedTopAppBar(
-                    title = { Text(text = if (destination?.titleTextId != null) stringResource(id = destination.titleTextId) else "") },
-                    windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                )
+//                if (navigationState.currentTopLevelKey != ForItNavKey) {
+//                    CenterAlignedTopAppBar(
+//                        title = { Text(text = if (destination?.titleTextId != null) stringResource(id = destination.titleTextId) else "") },
+//                        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+//                    )
+//                }
                 val entryProvider = entryProvider {
-                forYouEntry()
-                forHeEntry()
+//                forYouEntry()
+//                forHeEntry()
                 forItEntry()
 //            bookmarksEntry(navigator)
 //            interestsEntry(navigator)
@@ -134,7 +136,7 @@ internal fun NiaApp(
         }
 
 
-    }
+    // }
 }
 
 

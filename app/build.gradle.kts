@@ -7,6 +7,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("prod-release") {
+            storeFile = file("C:\\androidProject\\Navigation3\\buildKeyProdRelease")
+            storePassword = "123456"
+            keyAlias = "prodRelease"
+            keyPassword = "123456"
+        }
+    }
     namespace = "com.example.navigation3"
     compileSdk {
         version = release(36) {
@@ -31,6 +39,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("prod-release")
         }
     }
     compileOptions {
@@ -59,8 +68,8 @@ dependencies {
     implementation(libs.androidx.compose.material3.adaptive.navigation3)
     implementation(libs.androidx.navigation3.ui)
     implementation(project(":core:navigation"))
-    implementation(project(":feature:foryou"))
-    implementation(project(":feature:forhe"))
+//    implementation(project(":feature:foryou"))
+//    implementation(project(":feature:forhe"))
     implementation(project(":feature:forit"))
     implementation(project(":sync"))
     testImplementation(libs.junit)

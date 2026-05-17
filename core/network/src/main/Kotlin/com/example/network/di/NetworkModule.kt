@@ -2,7 +2,7 @@ package com.example.network.di
 
 import android.content.Context
 import com.example.network.BuildConfig
-import dagger.Lazy
+import com.example.network.demo.DemoAssetManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +15,6 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
-import com.example.network.DemoAssetManager
 
 @Module
 @InstallIn(SingletonComponent::class)

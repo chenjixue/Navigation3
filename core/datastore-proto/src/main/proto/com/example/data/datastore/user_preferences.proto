@@ -38,7 +38,7 @@ message UserPreferences {
     map<string, bool> followed_author_ids = 14;
     map<string, bool> bookmarked_news_resource_ids = 15;
     map<string, bool> viewed_news_resource_ids = 20;
-
+    string selected_date = 21;
 
 
     bool should_hide_onboarding = 18;

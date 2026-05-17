@@ -18,12 +18,12 @@ package com.example.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.foryou.ForYouNavKey
-import com.example.forhe.ForHeNavKey
+//import com.example.foryou.ForYouNavKey
+//import com.example.forhe.ForHeNavKey
 import com.example.forit.ForItNavKey
 import com.example.navigation.icon.NiaIcons
-import com.example.foryou.R  as foryouR
-import com.example.forhe.R  as forheR
+//import com.example.foryou.R  as foryouR
+//import com.example.forhe.R  as forheR
 import com.example.forit.R  as foritR
 
 /**
@@ -44,19 +44,19 @@ data class TopLevelNavItem(
     @StringRes val titleTextId: Int,
 )
 
-val FOR_YOU = TopLevelNavItem(
-    selectedIcon = NiaIcons.Upcoming,
-    unselectedIcon = NiaIcons.UpcomingBorder,
-    iconTextId = foryouR.string.feature_foryou_api_title,
-    titleTextId = foryouR.string.feature_foryou_api_title,
-)
-
-val FOR_HE = TopLevelNavItem(
-    selectedIcon = NiaIcons.Bookmarks,
-    unselectedIcon = NiaIcons.BookmarksBorder,
-    iconTextId = forheR.string.feature_forhe_api_title,
-    titleTextId = forheR.string.feature_forhe_api_title,
-)
+//val FOR_YOU = TopLevelNavItem(
+//    selectedIcon = NiaIcons.Upcoming,
+//    unselectedIcon = NiaIcons.UpcomingBorder,
+//    iconTextId = foryouR.string.feature_foryou_api_title,
+//    titleTextId = foryouR.string.feature_foryou_api_title,
+//)
+//
+//val FOR_HE = TopLevelNavItem(
+//    selectedIcon = NiaIcons.Bookmarks,
+//    unselectedIcon = NiaIcons.BookmarksBorder,
+//    iconTextId = forheR.string.feature_forhe_api_title,
+//    titleTextId = forheR.string.feature_forhe_api_title,
+//)
 
 val FOR_IT = TopLevelNavItem(
     selectedIcon = NiaIcons.Bookmarks,
@@ -80,7 +80,7 @@ val FOR_IT = TopLevelNavItem(
 //)
 
 val TOP_LEVEL_NAV_ITEMS = mapOf(
-    ForYouNavKey to FOR_YOU,
-    ForHeNavKey to FOR_HE,
+//    ForYouNavKey to FOR_YOU,
+//    ForHeNavKey to FOR_HE,
     ForItNavKey to FOR_IT,
 )

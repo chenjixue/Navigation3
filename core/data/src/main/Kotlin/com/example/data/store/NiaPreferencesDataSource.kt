@@ -14,12 +14,13 @@ import kotlin.collections.remove
 class NiaPreferencesDataSource @Inject constructor(
     private val userPreferences: DataStore<UserPreferences>,
 ) {
+//                viewedNewsResources = it.viewedNewsResourceIdsMap.keys,
+//                followedTopics = it.followedTopicIdsMap.keys,
+//                shouldHideOnboarding = it.shouldHideOnboarding,
     val userData = userPreferences.data
         .map {
             UserData(
-                viewedNewsResources = it.viewedNewsResourceIdsMap.keys,
-                followedTopics = it.followedTopicIdsMap.keys,
-                shouldHideOnboarding = it.shouldHideOnboarding,
+                it.selectedDate
             )
         }
 
@@ -42,6 +43,18 @@ class NiaPreferencesDataSource @Inject constructor(
                         followedTopicIds.remove(topicId)
                     }
                     updateShouldHideOnboardingIfNecessary()
+                }
+            }
+        } catch (ioException: IOException) {
+            Log.e("NiaPreferences", "Failed to update user preferences", ioException)
+        }
+    }
+
+    suspend fun setSelectedDate(date: String) {
+        try {
+            userPreferences.updateData {
+                it.copy {
+                    selectedDate =  date
                 }
             }
         } catch (ioException: IOException) {

@@ -4,6 +4,11 @@ import android.util.Log
 import com.example.network.model.NetworkChangeList
 import kotlin.coroutines.cancellation.CancellationException
 import com.example.data.store.ChangeListVersions
+import com.example.model.ChouhuResource
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlinx.coroutines.flow.Flow
 
 interface Synchronizer {
     suspend fun getChangeListVersions(): ChangeListVersions
@@ -33,26 +38,9 @@ private suspend fun <T> suspendRunCatching(block: suspend () -> T): Result<T> = 
 
 
 suspend fun Synchronizer.changeListSync(
-    versionReader: (ChangeListVersions) -> Int,
-    changeListFetcher: suspend (Int) -> List<NetworkChangeList>,
-    versionUpdater: ChangeListVersions.(Int) -> ChangeListVersions,
-    modelUpdater: suspend (List<String>) -> Unit,
-    modelDeleter: suspend (List<String>) -> Unit,
+//    modelGet: suspend (String) ->  Flow<List<ChouhuResource>>,
 ) = suspendRunCatching {
-    // Fetch the change list since last sync (akin to a git fetch)
-    val currentVersion = versionReader(getChangeListVersions())
-    val changeList = changeListFetcher(currentVersion)
-    if (changeList.isEmpty()) return@suspendRunCatching true
-
-    val (deleted, updated) = changeList.partition(NetworkChangeList::isDelete)
-
-    modelDeleter(deleted.map(NetworkChangeList::id))
-
-    modelUpdater(updated.map(NetworkChangeList::id))
-
-
-    val latestVersion = changeList.last().changeListVersion
-    updateChangeListVersions {
-        versionUpdater(latestVersion)
-    }
-}.isSuccess
+    val todayDateString = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    // 调用传入的闭包，并把今天的时间作为参数传进去
+//    modelGet(todayDateString)
+}

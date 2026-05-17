@@ -19,4 +19,7 @@ internal class OfflineFirstUserDataRepository @Inject constructor(
     override suspend fun setShouldHideOnboarding(shouldHideOnboarding: Boolean) {
         niaPreferencesDataSource.setShouldHideOnboarding(shouldHideOnboarding)
     }
+    override suspend fun setSelectedDate(date: String) {
+        niaPreferencesDataSource.setSelectedDate (date)
+    }
 }

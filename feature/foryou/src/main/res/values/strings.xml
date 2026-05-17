@@ -1,5 +1,0 @@
-<resources>
-    <string name="feature_foryou_api_title">For you</string><string name="feature_foryou_api_done">确定</string>
-    <string name="feature_foryou_api_onboarding_guidance_title">你对什么感兴趣</string>
-    <string name="feature_foryou_api_onboarding_guidance_subtitle">你关注的话题有更新时会显示在这里。请先关注一些内容，即可开始使用.</string>
-</resources>

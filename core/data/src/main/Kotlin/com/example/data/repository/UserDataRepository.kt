@@ -9,4 +9,6 @@ interface UserDataRepository {
     suspend fun setTopicIdFollowed(followedTopicId: String, followed: Boolean)
 
     suspend fun setShouldHideOnboarding(shouldHideOnboarding: Boolean)
+
+    suspend fun setSelectedDate(date: String)
 }
