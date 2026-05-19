@@ -11,6 +11,7 @@ import com.example.database.model.SaleResourceEntity
 import com.example.database.model.asExternalModel
 import com.example.database.model.asEntity
 import com.example.database.model.asNoSaleEntity
+import com.example.model.NoSaleResource
 import com.example.model.SaleResource
 import com.example.network.NiaNetworkDataSource
 
@@ -38,13 +39,13 @@ internal class OfflineSaleRepository @Inject constructor(
     override suspend fun setSaleResources(chouhuResource: List<SaleResource>) =
         saleResourceDao.upsertSaleResources(chouhuResource.map(SaleResource::asEntity))
 
-    override fun getNoSaleResources(): Flow<List<SaleResource>> {
+    override fun getNoSaleResources(): Flow<List<NoSaleResource>> {
         return noSaleResourceDao.getNoSaleResources().map { entities ->
             entities.map { it.asExternalModel() }
         }
     }
 
-    override fun getNoSaleResources(data: String): Flow<List<SaleResource>> {
+    override fun getNoSaleResources(data: String): Flow<List<NoSaleResource>> {
         return noSaleResourceDao.getNoSaleResources(data).map { entities ->
             entities.map { it.asExternalModel() }
         }
@@ -53,8 +54,8 @@ internal class OfflineSaleRepository @Inject constructor(
     override suspend fun deleteNoSaleResources(keys: List<String>) =
         noSaleResourceDao.deleteNoSaleResources(keys)
 
-    override suspend fun setNoSaleResources(chouhuResource: List<SaleResource>) =
-        noSaleResourceDao.upsertNoSaleResources(chouhuResource.map { it.asNoSaleEntity() })
+    override suspend fun setNoSaleResources(noSaleResource: List<NoSaleResource>) =
+        noSaleResourceDao.upsertNoSaleResources(noSaleResource.map { it.asNoSaleEntity() })
 
     override suspend fun syncWith(synchronizer: Synchronizer): Boolean =
         synchronizer.changeListSync(

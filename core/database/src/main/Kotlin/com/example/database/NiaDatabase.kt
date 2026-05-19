@@ -33,7 +33,10 @@ import com.example.database.model.TopicEntity
         SaleResourceEntity::class,
         NoSaleResourceEntity::class,
     ],
-    version = 17,
+    version = 18,
+    autoMigrations = [
+        AutoMigration(from = 17, to = 18, spec = DatabaseMigrations.Schema17to18::class),
+    ],
     exportSchema = true,
 )
 

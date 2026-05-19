@@ -19,6 +19,7 @@ import com.example.data.repository.ExpenseRepository
 import com.example.data.repository.SaleRepository
 import com.example.data.repository.UserDataRepository
 import com.example.model.ChouhuResource
+import com.example.model.NoSaleResource
 import com.example.model.OtherExpenseResource
 import com.example.model.PeopleExpenseResource
 import com.example.model.SaleResource
@@ -80,7 +81,7 @@ class ForYouViewModel @Inject constructor(
             initialValue = emptyList(),
         )
 
-    val noSaleExpenseList: StateFlow<List<SaleResource>> = userData
+    val noSaleList: StateFlow<List<NoSaleResource>> = userData
         .flatMapLatest { selectedDate ->
             saleRepository.getNoSaleResources(selectedDate)
         }
@@ -150,9 +151,9 @@ class ForYouViewModel @Inject constructor(
         }
     }
 
-    fun updateNoSaleResources(saleResources: List<SaleResource>) {
+    fun updateNoSaleResources(noSaleResources: List<NoSaleResource>) {
         viewModelScope.launch {
-            saleRepository.setNoSaleResources(saleResources)
+            saleRepository.setNoSaleResources(noSaleResources)
         }
     }
 

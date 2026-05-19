@@ -16,6 +16,8 @@ import kotlin.String
 data class SaleResourceEntity(
     @PrimaryKey
     val key: String,
+    @ColumnInfo(defaultValue = "")
+    val name: String,
     val level: String,
     @ColumnInfo(name = "unit_price")
     val unitPrice: Double,
@@ -26,6 +28,7 @@ data class SaleResourceEntity(
 
 fun SaleResourceEntity.asExternalModel() = SaleResource(
     key = key,
+    name = name,
     level = level,
     unitPrice = unitPrice,
     count = count,
@@ -33,7 +36,8 @@ fun SaleResourceEntity.asExternalModel() = SaleResource(
 )
 fun SaleResource.asEntity() = SaleResourceEntity(
     key = key,
-    level = level,
+    name = name,
+    level = level,  
     unitPrice = unitPrice,
     count = count,
     dataTime = dataTime

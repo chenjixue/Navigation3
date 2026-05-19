@@ -94,34 +94,59 @@ fun ExpensesScreen(
 ) {
     val peopleKeys = remember { mutableSetOf<String>() }
     val peopleItems = remember { mutableStateListOf<PeopleExpenseUiState>() }
-    var editingPeopleIndex by remember { mutableIntStateOf(-1) }
+    val editingPeopleKeys = remember { mutableStateOf(setOf<String>()) }
+    var peopleKeyToEditAfterLoad by remember { mutableStateOf<String?>(null) }
 
     val otherKeys = remember { mutableSetOf<String>() }
     val otherItems = remember { mutableStateListOf<OtherExpenseUiState>() }
-    var editingOtherIndex by remember { mutableIntStateOf(-1) }
+    val editingOtherKeys = remember { mutableStateOf(setOf<String>()) }
+    var otherKeyToEditAfterLoad by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(peopleExpenses) {
-        peopleKeys.clear()
-        peopleItems.clear()
-        peopleItems.addAll(
-            peopleExpenses.map {
-                peopleKeys.add(it.key)
-                it.asUiState()
-            }
-        )
-        if (editingPeopleIndex >= peopleItems.size) editingPeopleIndex = -1
+    LaunchedEffect(selectedDate) {
+        editingPeopleKeys.value = emptySet()
+        editingOtherKeys.value = emptySet()
     }
 
-    LaunchedEffect(otherExpenses) {
+    LaunchedEffect(peopleExpenses, selectedDate) {
+        if (editingPeopleKeys.value.isNotEmpty()) {
+            val newItemsMap = peopleExpenses.associateBy { it.key }
+            val preservedList = peopleItems.mapNotNull { newItemsMap[it.key]?.asUiState() }.toMutableList()
+            val preservedKeys = preservedList.map { it.key }.toSet()
+            preservedList.addAll(peopleExpenses.filter { it.key !in preservedKeys }.map { it.asUiState() })
+            peopleItems.clear()
+            peopleItems.addAll(preservedList)
+        } else {
+            peopleItems.clear()
+            peopleItems.addAll(peopleExpenses.map { it.asUiState() })
+        }
+        peopleKeys.clear()
+        peopleItems.forEach { peopleKeys.add(it.key) }
+
+        if (peopleKeyToEditAfterLoad != null) {
+            editingPeopleKeys.value = editingPeopleKeys.value + peopleKeyToEditAfterLoad!!
+            peopleKeyToEditAfterLoad = null
+        }
+    }
+
+    LaunchedEffect(otherExpenses, selectedDate) {
+        if (editingOtherKeys.value.isNotEmpty()) {
+            val newItemsMap = otherExpenses.associateBy { it.key }
+            val preservedList = otherItems.mapNotNull { newItemsMap[it.key]?.asUiState() }.toMutableList()
+            val preservedKeys = preservedList.map { it.key }.toSet()
+            preservedList.addAll(otherExpenses.filter { it.key !in preservedKeys }.map { it.asUiState() })
+            otherItems.clear()
+            otherItems.addAll(preservedList)
+        } else {
+            otherItems.clear()
+            otherItems.addAll(otherExpenses.map { it.asUiState() })
+        }
         otherKeys.clear()
-        otherItems.clear()
-        otherItems.addAll(
-            otherExpenses.map {
-                otherKeys.add(it.key)
-                it.asUiState()
-            }
-        )
-        if (editingOtherIndex >= otherItems.size) editingOtherIndex = -1
+        otherItems.forEach { otherKeys.add(it.key) }
+
+        if (otherKeyToEditAfterLoad != null) {
+            editingOtherKeys.value = editingOtherKeys.value + otherKeyToEditAfterLoad!!
+            otherKeyToEditAfterLoad = null
+        }
     }
 
     val maleWorkers = peopleItems.mapIndexedNotNull { index, item -> if (item.gender == "男") index to item else null }
@@ -134,7 +159,21 @@ fun ExpensesScreen(
     val totalAllText = if (totalAll == 0.0) "0" else if (totalAll % 1.0 == 0.0) totalAll.toInt().toString() else String.format(Locale.getDefault(), "%.1f", totalAll)
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                indication = null
+            ) {
+                if (editingPeopleKeys.value.isNotEmpty()) {
+                    editingPeopleKeys.value = emptySet()
+                    onSavePeopleExpense(peopleItems.map { it.asModel(selectedDate) })
+                }
+                if (editingOtherKeys.value.isNotEmpty()) {
+                    editingOtherKeys.value = emptySet()
+                    onSaveOtherExpense(otherItems.map { it.asModel(selectedDate) })
+                }
+            },
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -148,9 +187,10 @@ fun ExpensesScreen(
                         price = "",
                         gender = "男"
                     )
-                    peopleItems.add(newItem)
-                    editingPeopleIndex = peopleItems.lastIndex
-                    onSavePeopleExpense(peopleItems.map { it.asModel(selectedDate) })
+                    val updatedList = peopleExpenses.toMutableList()
+                    updatedList.add(newItem.asModel(selectedDate))
+                    peopleKeyToEditAfterLoad = newItem.key
+                    onSavePeopleExpense(updatedList)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -167,21 +207,22 @@ fun ExpensesScreen(
             val (originalIndex, item) = maleWorkers[idx]
             SwipeToDeletePeopleExpenseItem(
                 expense = item,
-                isEditing = editingPeopleIndex == originalIndex,
+                isEditing = editingPeopleKeys.value.contains(item.key),
                 onClick = {
-                    editingPeopleIndex = if (editingPeopleIndex == originalIndex) -1 else originalIndex
-                    editingOtherIndex = -1
+                    editingPeopleKeys.value = editingPeopleKeys.value + item.key
                 },
                 onValueChange = { updatedItem ->
-                    peopleItems[originalIndex] = updatedItem
-                    onSavePeopleExpense(peopleItems.map { it.asModel(selectedDate) })
+                    val updateIndex = peopleItems.indexOfFirst { it.key == item.key }
+                    if (updateIndex != -1) {
+                        peopleItems[updateIndex] = updatedItem
+                        onSavePeopleExpense(peopleItems.map { it.asModel(selectedDate) })
+                    }
                 },
                 onDelete = {
                     val removeIndex = peopleItems.indexOfFirst { it.key == item.key }
                     if (removeIndex != -1) {
                         peopleItems.removeAt(removeIndex)
-                        if (editingPeopleIndex == removeIndex) editingPeopleIndex = -1
-                        else if (editingPeopleIndex > removeIndex) editingPeopleIndex--
+                        editingPeopleKeys.value = editingPeopleKeys.value - item.key
                         onDeletePeopleExpense(listOf(item.key))
                     }
                 }
@@ -198,9 +239,10 @@ fun ExpensesScreen(
                         price = "",
                         gender = "女"
                     )
-                    peopleItems.add(newItem)
-                    editingPeopleIndex = peopleItems.lastIndex
-                    onSavePeopleExpense(peopleItems.map { it.asModel(selectedDate) })
+                    val updatedList = peopleExpenses.toMutableList()
+                    updatedList.add(newItem.asModel(selectedDate))
+                    peopleKeyToEditAfterLoad = newItem.key
+                    onSavePeopleExpense(updatedList)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -217,21 +259,22 @@ fun ExpensesScreen(
             val (originalIndex, item) = femaleWorkers[idx]
             SwipeToDeletePeopleExpenseItem(
                 expense = item,
-                isEditing = editingPeopleIndex == originalIndex,
+                isEditing = editingPeopleKeys.value.contains(item.key),
                 onClick = {
-                    editingPeopleIndex = if (editingPeopleIndex == originalIndex) -1 else originalIndex
-                    editingOtherIndex = -1
+                    editingPeopleKeys.value = editingPeopleKeys.value + item.key
                 },
                 onValueChange = { updatedItem ->
-                    peopleItems[originalIndex] = updatedItem
-                    onSavePeopleExpense(peopleItems.map { it.asModel(selectedDate) })
+                    val updateIndex = peopleItems.indexOfFirst { it.key == item.key }
+                    if (updateIndex != -1) {
+                        peopleItems[updateIndex] = updatedItem
+                        onSavePeopleExpense(peopleItems.map { it.asModel(selectedDate) })
+                    }
                 },
                 onDelete = {
                     val removeIndex = peopleItems.indexOfFirst { it.key == item.key }
                     if (removeIndex != -1) {
                         peopleItems.removeAt(removeIndex)
-                        if (editingPeopleIndex == removeIndex) editingPeopleIndex = -1
-                        else if (editingPeopleIndex > removeIndex) editingPeopleIndex--
+                        editingPeopleKeys.value = editingPeopleKeys.value - item.key
                         onDeletePeopleExpense(listOf(item.key))
                     }
                 }
@@ -248,9 +291,10 @@ fun ExpensesScreen(
                         unitPrice = "",
                         count = ""
                     )
-                    otherItems.add(newItem)
-                    editingOtherIndex = otherItems.lastIndex
-                    onSaveOtherExpense(otherItems.map { it.asModel(selectedDate) })
+                    val updatedList = otherExpenses.toMutableList()
+                    updatedList.add(newItem.asModel(selectedDate))
+                    otherKeyToEditAfterLoad = newItem.key
+                    onSaveOtherExpense(updatedList)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -271,21 +315,22 @@ fun ExpensesScreen(
             val item = otherItems[index]
             SwipeToDeleteOtherExpenseItem(
                 expense = item,
-                isEditing = editingOtherIndex == index,
+                isEditing = editingOtherKeys.value.contains(item.key),
                 onClick = {
-                    editingOtherIndex = if (editingOtherIndex == index) -1 else index
-                    editingPeopleIndex = -1
+                    editingOtherKeys.value = editingOtherKeys.value + item.key
                 },
                 onValueChange = { updatedItem ->
-                    otherItems[index] = updatedItem
-                    onSaveOtherExpense(otherItems.map { it.asModel(selectedDate) })
+                    val updateIndex = otherItems.indexOfFirst { it.key == item.key }
+                    if (updateIndex != -1) {
+                        otherItems[updateIndex] = updatedItem
+                        onSaveOtherExpense(otherItems.map { it.asModel(selectedDate) })
+                    }
                 },
                 onDelete = {
                     val removeIndex = otherItems.indexOfFirst { it.key == item.key }
                     if (removeIndex != -1) {
                         otherItems.removeAt(removeIndex)
-                        if (editingOtherIndex == removeIndex) editingOtherIndex = -1
-                        else if (editingOtherIndex > removeIndex) editingOtherIndex--
+                        editingOtherKeys.value = editingOtherKeys.value - item.key
                         onDeleteOtherExpense(listOf(item.key))
                     }
                 }

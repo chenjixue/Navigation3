@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.model.NewsResource
 import com.example.model.ChouhuResource
-import com.example.model.SaleResource
+import com.example.model.NoSaleResource
 import kotlin.String
 /**
  * Defines an NiA news resource.
@@ -17,25 +17,21 @@ data class NoSaleResourceEntity(
     @PrimaryKey
     val key: String,
     val level: String,
-    @ColumnInfo(name = "unit_price")
-    val unitPrice: Double,
     val count: Int,
     @ColumnInfo(name = "data_time")
     val dataTime: String,
 )
 
-fun NoSaleResourceEntity.asExternalModel() = SaleResource(
+fun NoSaleResourceEntity.asExternalModel() = NoSaleResource(
     key = key,
     level = level,
-    unitPrice = unitPrice,
     count = count,
     dataTime = dataTime
 )
 
-fun SaleResource.asNoSaleEntity() = NoSaleResourceEntity(
+fun NoSaleResource.asNoSaleEntity() = NoSaleResourceEntity(
     key = key,
     level = level,
-    unitPrice = unitPrice,
     count = count,
     dataTime = dataTime
 )

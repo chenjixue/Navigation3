@@ -1,11 +1,9 @@
 package com.example.model
 
-data class SaleResource(
+data class NoSaleResource(
     val key: String,
-    val name: String,
     //  4是杂货 5是囤积
     val level: String,
-    val unitPrice: Double,
     val count:Int,
     val dataTime: String
 )

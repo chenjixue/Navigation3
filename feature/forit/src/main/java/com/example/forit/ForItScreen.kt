@@ -75,6 +75,7 @@ import java.util.Locale
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.ChouhuResource
+import com.example.model.NoSaleResource
 import com.example.model.OtherExpenseResource
 import com.example.model.PeopleExpenseResource
 import com.example.model.SaleResource
@@ -152,6 +153,7 @@ fun OtherExpenseResource.asUiState() = OtherExpenseUiState(
 
 data class SaleUiState(
     val key: String,
+    val name: String,
     val level: String,
     val unitPrice: String,
     val count: String,
@@ -159,6 +161,7 @@ data class SaleUiState(
 
 fun SaleUiState.asModel(selectedDate: String) = SaleResource(
     key = key,
+    name = name,
     level = level,
     unitPrice = unitPrice.toDoubleOrNull() ?: 0.0,
     count = count.toIntOrNull() ?: 0,
@@ -167,8 +170,27 @@ fun SaleUiState.asModel(selectedDate: String) = SaleResource(
 
 fun SaleResource.asUiState() = SaleUiState(
     key = key,
+    name = name,
     level = level,
     unitPrice = if (unitPrice == 0.0) "" else if (unitPrice % 1.0 == 0.0) unitPrice.toInt().toString() else unitPrice.toString(),
+    count = if (count == 0) "" else count.toString(),
+)
+
+data class NoSaleUiState(
+    val key: String,
+    val level: String,
+    val count: String
+)
+
+fun NoSaleUiState.asModel(selectedDate: String) = NoSaleResource(
+    key = key,
+    level = level,
+    count = count.toIntOrNull() ?: 0,
+    dataTime = selectedDate,
+)
+fun NoSaleResource.asUiState() = NoSaleUiState(
+    key = key,
+    level = level,
     count = if (count == 0) "" else count.toString(),
 )
 
@@ -207,7 +229,7 @@ fun ForItScreen(
     val peopleExpenseList by viewModel.peopleExpenseList.collectAsStateWithLifecycle()
     val otherExpenseList by viewModel.otherExpenseList.collectAsStateWithLifecycle()
     val saleExpenseList by viewModel.saleExpenseList.collectAsStateWithLifecycle()
-    val noSaleExpenseList by viewModel.noSaleExpenseList.collectAsStateWithLifecycle()
+    val noSaleList by viewModel.noSaleList.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().background(BackgroundColor)) {
         TopHeader(
@@ -263,13 +285,14 @@ fun ForItScreen(
                 2 -> SalesScreen(
                     selectedDate = selectedDate,
                     sales = saleExpenseList,
-                    hoards = noSaleExpenseList,
+                    hoards = noSaleList,
                     chouhus = chouhuList,
                     peopleExpenses = peopleExpenseList,
                     otherExpenses = otherExpenseList,
                     onSaveSale = viewModel::updateSaleResources,
                     onSaveHoard = viewModel::updateNoSaleResources,
                     onDeleteHoard = viewModel::deleteNoSaleExpenseResources,
+                    onDeleteSale = viewModel::deleteSaleExpenseResources,
                 )
             }
         }

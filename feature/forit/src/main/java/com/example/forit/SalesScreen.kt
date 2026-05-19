@@ -40,6 +40,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -77,6 +79,7 @@ import java.util.Locale
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.ChouhuResource
+import com.example.model.NoSaleResource
 import com.example.model.OtherExpenseResource
 import com.example.model.PeopleExpenseResource
 import com.example.model.SaleResource
@@ -86,73 +89,88 @@ import kotlin.random.Random
 fun SalesScreen(
     selectedDate: String,
     sales: List<SaleResource>,
-    hoards: List<SaleResource>,
+    hoards: List<NoSaleResource>,
     chouhus: List<ChouhuResource>,
     peopleExpenses: List<PeopleExpenseResource>,
     otherExpenses: List<OtherExpenseResource>,
     onSaveSale: (List<SaleResource>) -> Unit,
-    onSaveHoard: (List<SaleResource>) -> Unit,
+    onSaveHoard: (List<NoSaleResource>) -> Unit,
     onDeleteHoard: (List<String>) -> Unit,
+    onDeleteSale: (List<String>) -> Unit,
 ) {
     // We expect exactly 4 fixed items for levels 1, 2, 3, 4(杂货) in sales list
     val fixedLevels = listOf("1", "2", "3", "4")
     val saleItems = remember { mutableStateListOf<SaleUiState>() }
-    var editingSaleIndex by remember { mutableIntStateOf(-1) }
+    // Instead of a single editing index, we track a set of keys that are currently being edited.
+    val editingSaleKeys = remember { mutableStateOf(setOf<String>()) }
+    
+    var keyToEditAfterLoad by remember { mutableStateOf<String?>(null) }
 
     val hoardKeys = remember { mutableSetOf<String>() }
-    val hoardItems = remember { mutableStateListOf<SaleUiState>() }
-    var editingHoardIndex by remember { mutableIntStateOf(-1) }
+    val hoardItems = remember { mutableStateListOf<NoSaleUiState>() }
+    val editingHoardKeys = remember { mutableStateOf(setOf<String>()) }
+    var hoardKeyToEditAfterLoad by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(selectedDate) {
+        editingSaleKeys.value = emptySet()
+        editingHoardKeys.value = emptySet()
+    }
 
     LaunchedEffect(sales, selectedDate) {
-        saleItems.clear()
-        
-        val currentKeys = mutableSetOf<String>()
-        // Initialize existing keys to prevent any collisions
-        sales.forEach { currentKeys.add(it.key) }
-        
-        fixedLevels.forEach { level ->
-            val existing = sales.find { it.level == level }
-            if (existing != null) {
-                saleItems.add(existing.asUiState())
-            } else {
-                val newKey = generateUniqueKey(currentKeys, selectedDate)
-                saleItems.add(
-                    SaleUiState(
-                        key = newKey,
-                        level = level,
-                        unitPrice = "",
-                        count = ""
-                    )
-                )
-            }
+        if (editingSaleKeys.value.isNotEmpty()) {
+            val newItemsMap = sales.associateBy { it.key }
+            val preservedList = saleItems.mapNotNull { newItemsMap[it.key]?.asUiState() }.toMutableList()
+            val preservedKeys = preservedList.map { it.key }.toSet()
+            preservedList.addAll(sales.filter { it.key !in preservedKeys }.map { it.asUiState() })
+            saleItems.clear()
+            saleItems.addAll(preservedList)
+        } else {
+            saleItems.clear()
+            saleItems.addAll(sales.map { it.asUiState() })
+            saleItems.sortBy { it.level }
         }
-        if (editingSaleIndex >= saleItems.size) editingSaleIndex = -1
+        
+        if (keyToEditAfterLoad != null) {
+            editingSaleKeys.value = editingSaleKeys.value + keyToEditAfterLoad!!
+            keyToEditAfterLoad = null
+        }
     }
 
     LaunchedEffect(hoards, selectedDate) {
-        hoardItems.clear()
-        
-        val currentKeys = mutableSetOf<String>()
-        // Initialize existing keys to prevent any collisions
-        hoards.forEach { currentKeys.add(it.key) }
-        
-        fixedLevels.forEach { level ->
-            val existing = hoards.find { it.level == level }
-            if (existing != null) {
-                hoardItems.add(existing.asUiState())
-            } else {
-                val newKey = generateUniqueKey(currentKeys, selectedDate)
-                hoardItems.add(
-                    SaleUiState(
-                        key = newKey,
-                        level = level,
-                        unitPrice = "",
-                        count = ""
+        if (editingHoardKeys.value.isNotEmpty()) {
+            val newItemsMap = hoards.associateBy { it.key }
+            val preservedList = hoardItems.mapNotNull { old -> 
+                newItemsMap[old.key]?.asUiState() ?: old 
+            }.toMutableList()
+            hoardItems.clear()
+            hoardItems.addAll(preservedList)
+        } else {
+            hoardItems.clear()
+            
+            val currentKeys = mutableSetOf<String>()
+            hoards.forEach { currentKeys.add(it.key) }
+            
+            fixedLevels.forEach { level ->
+                val existing = hoards.find { it.level == level }
+                if (existing != null) {
+                    hoardItems.add(existing.asUiState())
+                } else {
+                    val newKey = generateUniqueKey(currentKeys, selectedDate)
+                    hoardItems.add(
+                        NoSaleUiState(
+                            key = newKey,
+                            level = level,
+                            count = ""
+                        )
                     )
-                )
+                }
             }
         }
-        if (editingHoardIndex >= hoardItems.size) editingHoardIndex = -1
+        
+        if (hoardKeyToEditAfterLoad != null) {
+            editingHoardKeys.value = editingHoardKeys.value + hoardKeyToEditAfterLoad!!
+            hoardKeyToEditAfterLoad = null
+        }
     }
 
     val totalIncome = saleItems.sumOf { (it.unitPrice.toDoubleOrNull() ?: 0.0) * (it.count.toDoubleOrNull() ?: 0.0) }
@@ -171,7 +189,23 @@ fun SalesScreen(
     val totalExpenseText = if (totalExpense == 0.0) "0" else if (totalExpense % 1.0 == 0.0) totalExpense.toInt().toString() else String.format(Locale.getDefault(), "%.1f", totalExpense)
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            // Clicking outside of items will clear all edit states and trigger a sort.
+            .clickable(
+                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                indication = null
+            ) {
+                if (editingSaleKeys.value.isNotEmpty()) {
+                    editingSaleKeys.value = emptySet()
+                    saleItems.sortBy { it.level }
+                    onSaveSale(saleItems.map { it.asModel(selectedDate) })
+                }
+                if (editingHoardKeys.value.isNotEmpty()) {
+                    editingHoardKeys.value = emptySet()
+                    onSaveHoard(hoardItems.map { it.asModel(selectedDate) })
+                }
+            },
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -182,8 +216,38 @@ fun SalesScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(modifier = Modifier.background(Color(0xFFE3F2FD), RoundedCornerShape(4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) {
-                        Text("售卖记录", color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.background(Color(0xFFE3F2FD), RoundedCornerShape(4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) {
+                            Text("售卖记录", color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = {
+                                val currentKeys = saleItems.map { it.key }.toMutableSet()
+                                val newKey = generateUniqueKey(currentKeys, selectedDate)
+                                val newItem = SaleUiState(
+                                    key = newKey,
+                                    name = "",
+                                    level = "1",
+                                    unitPrice = "",
+                                    count = ""
+                                )
+                                // We don't add to saleItems directly. We append to the current sales list
+                                // and save it. The database will update and trigger LaunchedEffect(sales)
+                                // which will reload saleItems and set up the new row.
+                                val updatedSales = sales.toMutableList()
+                                updatedSales.add(newItem.asModel(selectedDate))
+                                
+                                // Remember this key so that when LaunchedEffect fires, we can find it
+                                // and automatically set it to edit mode.
+                                keyToEditAfterLoad = newKey
+                                
+                                onSaveSale(updatedSales)
+                            },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Sale", tint = Color(0xFF1976D2))
+                        }
                     }
                     Text("售卖总价: ¥$totalIncomeText", color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
@@ -209,16 +273,27 @@ fun SalesScreen(
 
         items(saleItems.size, key = { "sale_${saleItems[it].key}" }) { index ->
             val item = saleItems[index]
-            CompactSaleItemRow(
+            val isEditing = editingSaleKeys.value.contains(item.key)
+            SwipeToDeleteSaleItem(
                 expense = item,
-                isEditing = editingSaleIndex == index,
+                isEditing = isEditing,
                 onClick = {
-                    editingSaleIndex = if (editingSaleIndex == index) -1 else index
-                    editingHoardIndex = -1
+                    editingSaleKeys.value = editingSaleKeys.value + item.key
                 },
                 onValueChange = { updatedItem ->
-                    saleItems[index] = updatedItem
-                    onSaveSale(saleItems.map { it.asModel(selectedDate) })
+                    val updateIndex = saleItems.indexOfFirst { it.key == item.key }
+                    if (updateIndex != -1) {
+                        saleItems[updateIndex] = updatedItem
+                        onSaveSale(saleItems.map { it.asModel(selectedDate) })
+                    }
+                },
+                onDelete = {
+                    val removeIndex = saleItems.indexOfFirst { it.key == item.key }
+                    if (removeIndex != -1) {
+                        saleItems.removeAt(removeIndex)
+                        editingSaleKeys.value = editingSaleKeys.value - item.key
+                        onDeleteSale(listOf(item.key))
+                    }
                 }
             )
         }
@@ -252,14 +327,16 @@ fun SalesScreen(
                                 Box(modifier = Modifier.weight(1f)) {
                                     CompactHoardItem(
                                         expense = item,
-                                        isEditing = editingHoardIndex == index,
+                                        isEditing = editingHoardKeys.value.contains(item.key),
                                         onClick = {
-                                            editingHoardIndex = if (editingHoardIndex == index) -1 else index
-                                            editingSaleIndex = -1
+                                            editingHoardKeys.value = editingHoardKeys.value + item.key
                                         },
                                         onValueChange = { updatedItem ->
-                                            hoardItems[index] = updatedItem
-                                            onSaveHoard(hoardItems.map { it.asModel(selectedDate) })
+                                            val updateIndex = hoardItems.indexOfFirst { it.key == item.key }
+                                            if (updateIndex != -1) {
+                                                hoardItems[updateIndex] = updatedItem
+                                                onSaveHoard(hoardItems.map { it.asModel(selectedDate) })
+                                            }
                                         }
                                     )
                                 }
@@ -304,10 +381,10 @@ fun SalesScreen(
 
 @Composable
 fun CompactHoardItem(
-    expense: SaleUiState,
+    expense: NoSaleUiState,
     isEditing: Boolean,
     onClick: () -> Unit,
-    onValueChange: (SaleUiState) -> Unit,
+    onValueChange: (NoSaleUiState) -> Unit,
 ) {
     val title = when (expense.level) {
         "1" -> "1级货"
@@ -340,7 +417,9 @@ fun CompactHoardItem(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
+            .clickable { 
+                if (!isEditing) onClick() 
+            }
             .padding(horizontal = 8.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -389,12 +468,87 @@ fun CompactHoardItem(
 }
 
 @Composable
+fun SwipeToDeleteSaleItem(
+    expense: SaleUiState,
+    isEditing: Boolean,
+    onClick: () -> Unit,
+    onValueChange: (SaleUiState) -> Unit,
+    onDelete: () -> Unit,
+) {
+    val density = LocalDensity.current
+    val minDragDistancePx = with(density) { 120.dp.toPx() }
+
+    class StateHolder {
+        var state: SwipeToDismissBoxState? = null
+    }
+    val holder = remember { StateHolder() }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        positionalThreshold = { totalDistance -> totalDistance * 0.6f },
+        confirmValueChange = { dismissValue ->
+            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                val offset = try {
+                    holder.state?.requireOffset() ?: 0f
+                } catch (e: Exception) {
+                    0f
+                }
+                
+                if (offset > -minDragDistancePx) {
+                    return@rememberSwipeToDismissBoxState false
+                }
+                
+                onDelete()
+                true
+            } else {
+                false
+            }
+        },
+    )
+    holder.state = dismissState
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFD32F2F), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text("删除", color = Color.White, fontWeight = FontWeight.Bold)
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "删除记录",
+                        tint = Color.White,
+                    )
+                }
+            }
+        },
+    ) {
+        CompactSaleItemRow(
+            expense = expense,
+            isEditing = isEditing,
+            onClick = onClick,
+            onValueChange = onValueChange,
+        )
+    }
+}
+
+@Composable
 fun CompactSaleItemRow(
     expense: SaleUiState,
     isEditing: Boolean,
     onClick: () -> Unit,
     onValueChange: (SaleUiState) -> Unit,
 ) {
+    var expanded by remember { mutableStateOf(false) }
+
     val title = when (expense.level) {
         "1" -> "1级货"
         "2" -> "2级货"
@@ -426,7 +580,9 @@ fun CompactSaleItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
+            .clickable { 
+                if (!isEditing) onClick() 
+            }
             .padding(horizontal = 8.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -436,10 +592,31 @@ fun CompactSaleItemRow(
             modifier = Modifier
                 .weight(1f)
                 .background(tagBg, RoundedCornerShape(4.dp))
+                .clickable {
+                    if (!isEditing) {
+                        onClick() // Enable editing
+                    }
+                    expanded = true // And show dropdown
+                }
                 .padding(horizontal = 4.dp, vertical = 6.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(title, color = tagText, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                listOf("1", "2", "3", "4").forEach { levelOption ->
+                    val optionTitle = if (levelOption == "4") "杂货" else "${levelOption}级货"
+                    DropdownMenuItem(
+                        text = { Text(optionTitle) },
+                        onClick = {
+                            onValueChange(expense.copy(level = levelOption))
+                            expanded = false
+                        }
+                    )
+                }
+            }
         }
         
         Spacer(modifier = Modifier.width(8.dp))

@@ -93,22 +93,35 @@ fun SuppliersScreen(
     onDelete: (List<String>) -> Unit,
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var editingIndex by remember { mutableIntStateOf(-1) }
+    val editingKeys = remember { mutableStateOf(setOf<String>()) }
+    var keyToEditAfterLoad by remember { mutableStateOf<String?>(null) }
     val supplierKeys = remember { mutableSetOf<String>() }
     val supplierItems = remember {
         mutableStateListOf<SupplierItemUiState>()
     }
-    LaunchedEffect(initialItems) {
+    LaunchedEffect(selectedDate) {
+        editingKeys.value = emptySet()
+    }
+
+    LaunchedEffect(initialItems, selectedDate) {
+        if (editingKeys.value.isNotEmpty()) {
+            val newItemsMap = initialItems.associateBy { it.key }
+            val preservedList = supplierItems.mapNotNull { newItemsMap[it.key]?.asUiState() }.toMutableList()
+            val preservedKeys = preservedList.map { it.key }.toSet()
+            preservedList.addAll(initialItems.filter { it.key !in preservedKeys }.map { it.asUiState() })
+            supplierItems.clear()
+            supplierItems.addAll(preservedList)
+        } else {
+            supplierItems.clear()
+            supplierItems.addAll(initialItems.map { it.asUiState() })
+        }
+        
         supplierKeys.clear()
-        supplierItems.clear()
-        supplierItems.addAll(
-            initialItems.map { model ->
-                supplierKeys.add(model.key)
-                model.asUiState()
-            },
-        )
-        if (editingIndex >= supplierItems.size) {
-            editingIndex = -1
+        supplierItems.forEach { supplierKeys.add(it.key) }
+        
+        if (keyToEditAfterLoad != null) {
+            editingKeys.value = editingKeys.value + keyToEditAfterLoad!!
+            keyToEditAfterLoad = null
         }
     }
     val filteredItems = supplierItems.mapIndexedNotNull { index, item ->
@@ -121,7 +134,17 @@ fun SuppliersScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (editingKeys.value.isNotEmpty()) {
+                        editingKeys.value = emptySet()
+                        onSave(supplierItems.map { it.asModel(selectedDate) })
+                    }
+                },
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -186,23 +209,22 @@ fun SuppliersScreen(
                 val item = indexedItem.second
                 SwipeToDeleteSupplierItem(
                     supplier = item,
-                    isEditing = editingIndex == index,
+                    isEditing = editingKeys.value.contains(item.key),
                     onClick = {
-                        editingIndex = if (editingIndex == index) -1 else index
+                        editingKeys.value = editingKeys.value + item.key
                     },
                     onValueChange = { updatedItem ->
-                        supplierItems[index] = updatedItem
-                        onSave(supplierItems.map { it.asModel(selectedDate) })
+                        val updateIndex = supplierItems.indexOfFirst { it.key == item.key }
+                        if (updateIndex != -1) {
+                            supplierItems[updateIndex] = updatedItem
+                            onSave(supplierItems.map { it.asModel(selectedDate) })
+                        }
                     },
                     onDelete = {
                         val removeIndex = supplierItems.indexOfFirst { it.key == item.key }
                         if (removeIndex != -1) {
                             supplierItems.removeAt(removeIndex)
-                            editingIndex = when {
-                                editingIndex == removeIndex -> -1
-                                editingIndex > removeIndex -> editingIndex - 1
-                                else -> editingIndex
-                            }
+                            editingKeys.value = editingKeys.value - item.key
                             onDelete(listOf(item.key))
                         }
                     },
@@ -220,9 +242,10 @@ fun SuppliersScreen(
                     unitPrice = "",
                     quantity = "",
                 )
-                supplierItems.add(newItem)
-                editingIndex = supplierItems.lastIndex
-                onSave(supplierItems.map { it.asModel(selectedDate) })
+                val updatedList = initialItems.toMutableList()
+                updatedList.add(newItem.asModel(selectedDate))
+                keyToEditAfterLoad = newItem.key
+                onSave(updatedList)
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
