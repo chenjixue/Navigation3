@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.database
+package com.example.database.migration
 
 import androidx.room.DeleteColumn
 import androidx.room.DeleteTable
@@ -28,12 +28,12 @@ import androidx.room.migration.AutoMigrationSpec
  * from and Y is the schema version you're migrating to. The class should implement
  * `AutoMigrationSpec`.
  */
-internal object DatabaseMigrations {
+internal object Migration17to18{
 
     @DeleteColumn(
         tableName = "no_sale_resources",
         columnName = "unit_price",
     )
     class Schema17to18 : AutoMigrationSpec
-  
+
 }

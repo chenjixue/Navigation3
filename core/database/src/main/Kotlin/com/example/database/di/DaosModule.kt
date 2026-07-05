@@ -22,12 +22,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.example.database.dao.NewsResourceDao
 import com.example.database.dao.NoSaleResourceDao
 import com.example.database.dao.OtherExpenseResourceDao
 import com.example.database.dao.PeopleExpenseResourceDao
 import com.example.database.dao.SaleResourceDao
-import com.example.database.dao.TopicDao
+
 
 @Module
 @InstallIn(SingletonComponent::class)
