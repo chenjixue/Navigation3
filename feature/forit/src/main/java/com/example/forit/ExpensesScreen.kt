@@ -194,11 +194,10 @@ fun ExpensesScreen(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("姓名", modifier = Modifier.weight(1.5f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text("工价", modifier = Modifier.weight(1.5f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
                 }
             }
@@ -298,16 +297,13 @@ fun ExpensesScreen(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("项目名称", modifier = Modifier.weight(1.5f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text("数量", modifier = Modifier.weight(1f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text("单价", modifier = Modifier.weight(1.2f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("总额", modifier = Modifier.weight(1.2f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.End)
+                    Text("总额", modifier = Modifier.weight(1.5f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.End)
                 }
             }
         }
@@ -456,9 +452,11 @@ fun PeopleExpenseCard(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
+            .clickable { 
+                if (!isEditing) onClick() 
+            }
             .padding(horizontal = 8.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Name
@@ -488,8 +486,6 @@ fun PeopleExpenseCard(
                 color = if (expense.name.isEmpty()) TextGray else Color.Black
             )
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         // Price
         if (isEditing) {
@@ -607,9 +603,11 @@ fun OtherExpenseCard(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
+            .clickable { 
+                if (!isEditing) onClick() 
+            }
             .padding(horizontal = 8.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Name
@@ -624,7 +622,7 @@ fun OtherExpenseCard(
                 textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
                 decorationBox = { innerTextField ->
                     if (expense.name.isEmpty()) {
-                        Text("名称", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        Text("项目名称", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                     }
                     innerTextField()
                 }
@@ -639,8 +637,6 @@ fun OtherExpenseCard(
                 color = if (expense.name.isEmpty()) TextGray else Color.Black
             )
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         // Quantity
         if (isEditing) {
@@ -670,8 +666,6 @@ fun OtherExpenseCard(
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
         // Unit Price
         if (isEditing) {
             BasicTextField(
@@ -700,13 +694,11 @@ fun OtherExpenseCard(
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
         // Total
         val moneyColor = if (total > 0) PrimaryGreen else Color.DarkGray
         Text(
             text = "¥$totalText",
-            modifier = Modifier.weight(1.2f),
+            modifier = Modifier.weight(1.5f),
             color = moneyColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,

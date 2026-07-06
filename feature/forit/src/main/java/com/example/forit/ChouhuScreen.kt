@@ -174,26 +174,45 @@ fun SuppliersScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("今日抽户列表", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                    Button(
+                        onClick = {
+                            val newItem = SupplierItemUiState(
+                                key = generateUniqueKey(supplierKeys, selectedDate),
+                                name = "",
+                                unitPrice = "",
+                                quantity = "",
+                            )
+                            val updatedList = initialItems.toMutableList()
+                            updatedList.add(newItem.asModel(selectedDate))
+                            keyToEditAfterLoad = newItem.key
+                            onSave(updatedList)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("添加", fontSize = 12.sp, color = Color.White)
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Text("姓名", modifier = Modifier.weight(1.5f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(modifier = Modifier.weight(1.2f), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("$totalChouhuCount 斤", color = Color(0xFF1976D2), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(2.dp))
                         Text("斤量", fontSize = 12.sp, color = TextGray)
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("单价", modifier = Modifier.weight(1.2f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.weight(1.2f), horizontalAlignment = Alignment.End) {
+                    Text("单价", modifier = Modifier.weight(1f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
+                    Column(modifier = Modifier.weight(1.5f), horizontalAlignment = Alignment.End) {
                         Text("¥$totalChouhuText", color = Color(0xFF1976D2), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(2.dp))
                         Text("总额", fontSize = 12.sp, color = TextGray)
@@ -232,32 +251,6 @@ fun SuppliersScreen(
             }
 
             item { Spacer(modifier = Modifier.height(80.dp)) }
-        }
-
-        Button(
-            onClick = {
-                val newItem = SupplierItemUiState(
-                    key = generateUniqueKey(supplierKeys, selectedDate),
-                    name = "",
-                    unitPrice = "",
-                    quantity = "",
-                )
-                val updatedList = initialItems.toMutableList()
-                updatedList.add(newItem.asModel(selectedDate))
-                keyToEditAfterLoad = newItem.key
-                onSave(updatedList)
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .fillMaxWidth(0.6f)
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("添加抽户", fontSize = 16.sp, color = Color.White)
         }
     }
 }
@@ -351,9 +344,11 @@ fun SupplierCard(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
+            .clickable { 
+                if (!isEditing) onClick() 
+            }
             .padding(horizontal = 8.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Name
@@ -384,15 +379,13 @@ fun SupplierCard(
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
         // Quantity
         if (isEditing) {
             BasicTextField(
                 value = supplier.quantity,
                 onValueChange = { onValueChange(supplier.copy(quantity = it)) },
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(1.2f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
                     .padding(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -406,15 +399,13 @@ fun SupplierCard(
             )
         } else {
             Text(
-                text = if (supplier.quantity.isEmpty()) "0" else "${supplier.quantity}",
-                modifier = Modifier.weight(1f),
+                text = if (supplier.quantity.isEmpty()) "0斤" else "${supplier.quantity}斤",
+                modifier = Modifier.weight(1.2f),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 color = if (supplier.quantity.isEmpty()) TextGray else Color.Black
             )
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         // Unit Price
         if (isEditing) {
@@ -422,7 +413,7 @@ fun SupplierCard(
                 value = supplier.unitPrice,
                 onValueChange = { onValueChange(supplier.copy(unitPrice = it)) },
                 modifier = Modifier
-                    .weight(1.2f)
+                    .weight(1f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
                     .padding(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -437,20 +428,18 @@ fun SupplierCard(
         } else {
             Text(
                 text = if (supplier.unitPrice.isEmpty()) "¥0" else "¥${supplier.unitPrice}",
-                modifier = Modifier.weight(1.2f),
+                modifier = Modifier.weight(1f),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 color = if (supplier.unitPrice.isEmpty()) TextGray else Color.Black
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
         // Total
         val moneyColor = if (total > 0) PrimaryGreen else Color.DarkGray
         Text(
             text = "¥$totalText",
-            modifier = Modifier.weight(1.2f),
+            modifier = Modifier.weight(1.5f),
             color = moneyColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,

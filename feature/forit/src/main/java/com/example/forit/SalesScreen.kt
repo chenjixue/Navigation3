@@ -76,6 +76,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.ChouhuResource
@@ -93,6 +94,7 @@ fun SalesScreen(
     chouhus: List<ChouhuResource>,
     peopleExpenses: List<PeopleExpenseResource>,
     otherExpenses: List<OtherExpenseResource>,
+    viewModel: ForYouViewModel,
     onSaveSale: (List<SaleResource>) -> Unit,
     onSaveHoard: (List<NoSaleResource>) -> Unit,
     onDeleteHoard: (List<String>) -> Unit,
@@ -178,15 +180,11 @@ fun SalesScreen(
 
     val totalHoard = hoardItems.sumOf { it.count.toDoubleOrNull()?.toInt() ?: 0 }
 
-    val totalChouhu = chouhus.sumOf { it.unitPrice * it.count }
-    val totalPeopleExpense = peopleExpenses.sumOf { it.price }
-    val totalOtherExpense = otherExpenses.sumOf { it.unitPrice * it.count }
-    val totalExpense = totalPeopleExpense + totalOtherExpense
+    val currentDayProfit by viewModel.currentDayProfit.collectAsStateWithLifecycle()
+    val dayProfitText = if (currentDayProfit == 0.0) "0" else if (currentDayProfit % 1.0 == 0.0) currentDayProfit.toInt().toString() else String.format(Locale.getDefault(), "%.1f", currentDayProfit)
 
-    val profit = totalIncome - totalChouhu - totalExpense
-    val profitText = if (profit == 0.0) "0" else if (profit % 1.0 == 0.0) profit.toInt().toString() else String.format(Locale.getDefault(), "%.1f", profit)
-    val totalChouhuText = if (totalChouhu == 0.0) "0" else if (totalChouhu % 1.0 == 0.0) totalChouhu.toInt().toString() else String.format(Locale.getDefault(), "%.1f", totalChouhu)
-    val totalExpenseText = if (totalExpense == 0.0) "0" else if (totalExpense % 1.0 == 0.0) totalExpense.toInt().toString() else String.format(Locale.getDefault(), "%.1f", totalExpense)
+    val currentMonthProfit by viewModel.currentMonthProfit.collectAsStateWithLifecycle()
+    val monthProfitText = if (currentMonthProfit == 0.0) "0" else if (currentMonthProfit % 1.0 == 0.0) currentMonthProfit.toInt().toString() else String.format(Locale.getDefault(), "%.1f", currentMonthProfit)
 
     LazyColumn(
         modifier = Modifier
@@ -249,25 +247,10 @@ fun SalesScreen(
                             Icon(Icons.Default.Add, contentDescription = "Add Sale", tint = Color(0xFF1976D2))
                         }
                     }
-                    Text("售卖总价: ¥$totalIncomeText", color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text("总卖: ¥$totalIncomeText", color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
                 
-                // Header row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("级别", modifier = Modifier.weight(1.2f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("斤数", modifier = Modifier.weight(1.5f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("单价", modifier = Modifier.weight(1.5f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.Center)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("总价", modifier = Modifier.weight(1.2f), fontSize = 12.sp, color = TextGray, textAlign = TextAlign.End)
-                }
+
             }
         }
 
@@ -308,7 +291,7 @@ fun SalesScreen(
                     Box(modifier = Modifier.background(Color(0xFFFFEBEE), RoundedCornerShape(4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) {
                         Text("今日囤积", color = Color(0xFFD32F2F), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
-                    Text("囤积总数量: $totalHoard 斤", color = Color(0xFFD32F2F), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text("总数量: $totalHoard 斤", color = Color(0xFFD32F2F), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -354,23 +337,46 @@ fun SalesScreen(
                 colors = CardDefaults.cardColors(containerColor = PrimaryGreen),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                        Text("今日盈利", fontSize = 16.sp, color = Color.White)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("售卖(¥$totalIncomeText) - 抽户(¥$totalChouhuText) - 开支(¥$totalExpenseText)", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                Column {
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("今日盈利", fontSize = 16.sp, color = Color.White)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("今日售卖 - 今日抽户 - 今日开支", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                        }
+                        Text(
+                            text = "¥$dayProfitText",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 1
+                        )
                     }
-                    Text(
-                        text = "¥$profitText",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 1
-                    )
+                    
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.2f)))
+                    
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("当月盈利", fontSize = 14.sp, color = Color.White.copy(alpha = 0.85f))
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text("当月售卖 - 当月抽户 - 当月开支", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                        }
+                        Text(
+                            text = "¥$monthProfitText",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White.copy(alpha = 0.9f),
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }
@@ -421,22 +427,20 @@ fun CompactHoardItem(
                 if (!isEditing) onClick() 
             }
             .padding(horizontal = 8.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Level
         Box(
             modifier = Modifier
-                .weight(1f)
+                .weight(1.2f)
                 .background(tagBg, RoundedCornerShape(4.dp))
-                .padding(horizontal = 4.dp, vertical = 6.dp),
+                .padding(horizontal = 2.dp, vertical = 6.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(title, color = tagText, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
         
-        Spacer(modifier = Modifier.width(8.dp))
-
         // Count
         if (isEditing) {
             BasicTextField(
@@ -446,7 +450,7 @@ fun CompactHoardItem(
                     .weight(1.5f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
                     .padding(8.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
                 decorationBox = { innerTextField ->
                     if (expense.count.isEmpty()) {
@@ -576,32 +580,31 @@ fun CompactSaleItemRow(
         else -> PrimaryGreen
     }
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(8.dp))
             .clickable { 
                 if (!isEditing) onClick() 
             }
-            .padding(horizontal = 8.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Level
+        // Row 1: Level
         Box(
             modifier = Modifier
-                .weight(1f)
-                .background(tagBg, RoundedCornerShape(4.dp))
+                .fillMaxWidth()
+                .background(tagBg, RoundedCornerShape(6.dp))
                 .clickable {
                     if (!isEditing) {
                         onClick() // Enable editing
                     }
                     expanded = true // And show dropdown
                 }
-                .padding(horizontal = 4.dp, vertical = 6.dp),
+                .padding(vertical = 12.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(title, color = tagText, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(title, color = tagText, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -619,80 +622,120 @@ fun CompactSaleItemRow(
             }
         }
         
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Count
-        if (isEditing) {
-            BasicTextField(
-                value = expense.count,
-                onValueChange = { onValueChange(expense.copy(count = it)) },
-                modifier = Modifier
-                    .weight(1f)
-                    .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
-                decorationBox = { innerTextField ->
-                    if (expense.count.isEmpty()) {
-                        Text("斤数", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        // Row 2: Name and Count
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Name
+            if (isEditing) {
+                BasicTextField(
+                    value = expense.name,
+                    onValueChange = { onValueChange(expense.copy(name = it)) },
+                    modifier = Modifier
+                        .weight(1.3f)
+                        .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
+                        .padding(8.dp),
+                    textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    decorationBox = { innerTextField ->
+                        if (expense.name.isEmpty()) {
+                            Text("名字", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
-                }
-            )
-        } else {
-            Text(
-                text = if (expense.count.isEmpty()) "0 斤" else "${expense.count} 斤",
+                )
+            } else {
+                Text(
+                    text = if (expense.name.isEmpty()) "名字" else expense.name,
+                    modifier = Modifier.weight(1.3f),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    color = if (expense.name.isEmpty()) TextGray else Color.Black
+                )
+            }
+
+            // Count
+            if (isEditing) {
+                BasicTextField(
+                    value = expense.count,
+                    onValueChange = { onValueChange(expense.copy(count = it)) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
+                        .padding(8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    decorationBox = { innerTextField ->
+                        if (expense.count.isEmpty()) {
+                            Text("斤数", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
+                    }
+                )
+            } else {
+                Text(
+                    text = if (expense.count.isEmpty()) "0 斤" else "${expense.count} 斤",
+                    modifier = Modifier.weight(1f),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    color = if (expense.count.isEmpty()) TextGray else Color.Black
+                )
+            }
+        }
+
+        // Row 3: Unit Price and Total
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Unit Price
+            if (isEditing) {
+                BasicTextField(
+                    value = expense.unitPrice,
+                    onValueChange = { onValueChange(expense.copy(unitPrice = it)) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
+                        .padding(8.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    decorationBox = { innerTextField ->
+                        if (expense.unitPrice.isEmpty()) {
+                            Text("单价", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
+                    }
+                )
+            } else {
+                Text(
+                    text = if (expense.unitPrice.isEmpty()) "¥0" else "¥${expense.unitPrice}",
+                    modifier = Modifier.weight(1f),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    color = if (expense.unitPrice.isEmpty()) TextGray else Color.Black
+                )
+            }
+
+            // Total
+            val total = (expense.unitPrice.toDoubleOrNull() ?: 0.0) * (expense.count.toDoubleOrNull() ?: 0.0)
+            val totalText = if (total == 0.0) "0" else if (total % 1.0 == 0.0) total.toInt().toString() else String.format(Locale.getDefault(), "%.1f", total)
+            val moneyColor = if (total > 0) PrimaryGreen else Color.DarkGray
+            
+            Box(
                 modifier = Modifier.weight(1f),
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-                color = if (expense.count.isEmpty()) TextGray else Color.Black
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "¥$totalText",
+                    color = moneyColor,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-    // Unit Price
-        if (isEditing) {
-            BasicTextField(
-                value = expense.unitPrice,
-                onValueChange = { onValueChange(expense.copy(unitPrice = it)) },
-                modifier = Modifier
-                    .weight(1.5f)
-                    .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
-                decorationBox = { innerTextField ->
-                    if (expense.unitPrice.isEmpty()) {
-                        Text("单价", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                    }
-                    innerTextField()
-                }
-            )
-        } else {
-            Text(
-                text = if (expense.unitPrice.isEmpty()) "¥0" else "¥${expense.unitPrice}",
-                modifier = Modifier.weight(1.5f),
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-                color = if (expense.unitPrice.isEmpty()) TextGray else Color.Black
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Total
-        val total = (expense.unitPrice.toDoubleOrNull() ?: 0.0) * (expense.count.toDoubleOrNull() ?: 0.0)
-        val totalText = if (total == 0.0) "0" else if (total % 1.0 == 0.0) total.toInt().toString() else String.format(Locale.getDefault(), "%.1f", total)
-        val moneyColor = if (total > 0) PrimaryGreen else Color.DarkGray
-        Text(
-            text = "¥$totalText",
-            modifier = Modifier.weight(1.2f),
-            color = moneyColor,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.End
-        )
     }
 }
 

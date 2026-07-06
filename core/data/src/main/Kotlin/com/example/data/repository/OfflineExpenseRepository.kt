@@ -25,8 +25,20 @@ internal class OfflineExpenseRepository @Inject constructor(
         }
     }
 
+    override fun getPeopleExpenseResources(): Flow<List<PeopleExpenseResource>> {
+        return peopleExpenseResourceDao.getPeopleExpenseResources().map { entities ->
+            entities.map(PeopleExpenseResourceEntity::asExternalModel)
+        }
+    }
+
     override fun getOtherExpenseResources(dataTime: String): Flow<List<OtherExpenseResource>> {
         return otherExpenseResourceDao.getOtherExpenseResources(dataTime).map { entities ->
+            entities.map(OtherExpenseResourceEntity::asExternalModel)
+        }
+    }
+
+    override fun getOtherExpenseResources(): Flow<List<OtherExpenseResource>> {
+        return otherExpenseResourceDao.getOtherExpenseResources().map { entities ->
             entities.map(OtherExpenseResourceEntity::asExternalModel)
         }
     }

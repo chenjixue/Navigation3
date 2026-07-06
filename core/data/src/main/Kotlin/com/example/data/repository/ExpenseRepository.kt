@@ -16,7 +16,9 @@ interface ExpenseRepository : Syncable {
      */
 
     fun getPeopleExpenseResources(dataTime: String): Flow<List<PeopleExpenseResource>>
+    fun getPeopleExpenseResources(): Flow<List<PeopleExpenseResource>>
     fun getOtherExpenseResources(dataTime: String): Flow<List<OtherExpenseResource>>
+    fun getOtherExpenseResources(): Flow<List<OtherExpenseResource>>
 
     suspend fun deletePeopleExpenseResources(keys: List<String>)
     suspend fun setPeopleExpenseResources(peopleExpenseResources: List<PeopleExpenseResource>)

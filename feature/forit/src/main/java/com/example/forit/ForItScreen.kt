@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -231,39 +232,11 @@ fun ForItScreen(
     val saleExpenseList by viewModel.saleExpenseList.collectAsStateWithLifecycle()
     val noSaleList by viewModel.noSaleList.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize().background(BackgroundColor)) {
+    Column(modifier = Modifier.fillMaxSize().background(BackgroundColor).imePadding()) {
         TopHeader(
             selectedDateString = selectedDate,
             onDateChanged = viewModel::updateSelectedDate
         )
-
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            containerColor = Color.White,
-            contentColor = PrimaryGreen,
-            indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
-                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                    color = PrimaryGreen,
-                    height = 3.dp
-                )
-            }
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
-                    text = {
-                        Text(
-                            title,
-                            fontSize = 16.sp,
-                            color = if (selectedTabIndex == index) PrimaryGreen else Color.Gray,
-                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
-                )
-            }
-        }
 
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTabIndex) {
@@ -289,10 +262,39 @@ fun ForItScreen(
                     chouhus = chouhuList,
                     peopleExpenses = peopleExpenseList,
                     otherExpenses = otherExpenseList,
+                    viewModel = viewModel,
                     onSaveSale = viewModel::updateSaleResources,
                     onSaveHoard = viewModel::updateNoSaleResources,
-                    onDeleteHoard = viewModel::deleteNoSaleExpenseResources,
-                    onDeleteSale = viewModel::deleteSaleExpenseResources,
+                    onDeleteSale = { keys -> viewModel.deleteSaleResources(keys) },
+                    onDeleteHoard = { keys -> viewModel.deleteNoSaleResources(keys) }
+                )
+            }
+        }
+
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            containerColor = Color.White,
+            contentColor = PrimaryGreen,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    color = PrimaryGreen,
+                    height = 3.dp
+                )
+            }
+        ) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = {
+                        Text(
+                            title,
+                            fontSize = 16.sp,
+                            color = if (selectedTabIndex == index) PrimaryGreen else Color.Gray,
+                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
                 )
             }
         }

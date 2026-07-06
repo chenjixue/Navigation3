@@ -23,6 +23,9 @@ import com.example.model.NoSaleResource
 import com.example.model.OtherExpenseResource
 import com.example.model.PeopleExpenseResource
 import com.example.model.SaleResource
+import com.example.domain.GetDayProfitUseCase
+import com.example.domain.GetMonthProfitUseCase
+import kotlinx.coroutines.flow.combine
 
 @HiltViewModel
 class ForYouViewModel @Inject constructor(
@@ -31,6 +34,8 @@ class ForYouViewModel @Inject constructor(
     private val expenseRepository: ExpenseRepository,
     private val saleRepository: SaleRepository,
     private val userDataRepository: UserDataRepository,
+    private val getDayProfitUseCase: GetDayProfitUseCase,
+    private val getMonthProfitUseCase: GetMonthProfitUseCase,
 ) : ViewModel() {
 
     val userData: StateFlow<String> = userDataRepository.userData
@@ -91,6 +96,27 @@ class ForYouViewModel @Inject constructor(
             initialValue = emptyList(),
         )
 
+    val currentDayProfit: StateFlow<Double> = userData
+        .flatMapLatest { selectedDate ->
+            getDayProfitUseCase(selectedDate)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = 0.0,
+        )
+
+    val currentMonthProfit: StateFlow<Double> = userData
+        .flatMapLatest { selectedDate ->
+            val yearMonth = selectedDate.substringBeforeLast("-") // Extracts "yyyy-MM" from "yyyy-MM-dd"
+            getMonthProfitUseCase(yearMonth)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = 0.0,
+        )
+
     fun deleteChouhu(keys: List<String>) {
         viewModelScope.launch {
             chouhuRepository.deleteChouhuResources(keys)
@@ -109,13 +135,13 @@ class ForYouViewModel @Inject constructor(
         }
     }
 
-    fun deleteSaleExpenseResources(keys: List<String>) {
+    fun deleteSaleResources(keys: List<String>) {
         viewModelScope.launch {
             saleRepository.deleteSaleResources(keys)
         }
     }
 
-    fun deleteNoSaleExpenseResources(keys: List<String>) {
+    fun deleteNoSaleResources(keys: List<String>) {
         viewModelScope.launch {
             saleRepository.deleteNoSaleResources(keys)
         }
