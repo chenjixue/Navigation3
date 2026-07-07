@@ -37,6 +37,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -459,6 +460,7 @@ fun PeopleExpenseCard(
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val commonTextStyle = LocalTextStyle.current.copy(fontSize = inputFontSize, textAlign = TextAlign.Center)
         // Name
         if (isEditing) {
             BasicTextField(
@@ -467,20 +469,22 @@ fun PeopleExpenseCard(
                 modifier = Modifier
                     .weight(1.5f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    .padding(inputPadding),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (expense.name.isEmpty()) {
-                        Text("姓名", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        if (expense.name.isEmpty()) {
+                            Text("姓名", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (expense.name.isEmpty()) "姓名" else expense.name,
                 modifier = Modifier.weight(1.5f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 color = if (expense.name.isEmpty()) TextGray else Color.Black
@@ -495,21 +499,23 @@ fun PeopleExpenseCard(
                 modifier = Modifier
                     .weight(1.5f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
+                    .padding(inputPadding),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (expense.price.isEmpty()) {
-                        Text("工价", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        if (expense.price.isEmpty()) {
+                            Text("工价", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (expense.price.isEmpty()) "¥0" else "¥${expense.price}",
                 modifier = Modifier.weight(1.5f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 color = if (expense.price.isEmpty()) TextGray else PrimaryGreen
@@ -610,6 +616,7 @@ fun OtherExpenseCard(
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val commonTextStyle = LocalTextStyle.current.copy(fontSize = inputFontSize, textAlign = TextAlign.Center)
         // Name
         if (isEditing) {
             BasicTextField(
@@ -618,20 +625,22 @@ fun OtherExpenseCard(
                 modifier = Modifier
                     .weight(1.5f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    .padding(inputPadding),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (expense.name.isEmpty()) {
-                        Text("项目名称", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        if (expense.name.isEmpty()) {
+                            Text("项目名称", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (expense.name.isEmpty()) "项目名称" else expense.name,
                 modifier = Modifier.weight(1.5f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 color = if (expense.name.isEmpty()) TextGray else Color.Black
@@ -646,21 +655,23 @@ fun OtherExpenseCard(
                 modifier = Modifier
                     .weight(1f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
+                    .padding(inputPadding),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (expense.count.isEmpty()) {
-                        Text("数量", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        if (expense.count.isEmpty()) {
+                            Text("数量", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (expense.count.isEmpty()) "0" else "${expense.count}",
                 modifier = Modifier.weight(1f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 color = if (expense.count.isEmpty()) TextGray else Color.Black
             )
@@ -674,21 +685,23 @@ fun OtherExpenseCard(
                 modifier = Modifier
                     .weight(1.2f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
+                    .padding(inputPadding),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (expense.unitPrice.isEmpty()) {
-                        Text("单价", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        if (expense.unitPrice.isEmpty()) {
+                            Text("单价", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (expense.unitPrice.isEmpty()) "¥0" else "¥${expense.unitPrice}",
                 modifier = Modifier.weight(1.2f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 color = if (expense.unitPrice.isEmpty()) TextGray else Color.Black
             )
@@ -700,7 +713,7 @@ fun OtherExpenseCard(
             text = "¥$totalText",
             modifier = Modifier.weight(1.5f),
             color = moneyColor,
-            fontSize = 14.sp,
+            fontSize = inputFontSize,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.End
         )

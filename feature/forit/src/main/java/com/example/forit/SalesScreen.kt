@@ -37,6 +37,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -442,6 +443,8 @@ fun CompactHoardItem(
         }
         
         // Count
+        val commonTextStyle = LocalTextStyle.current.copy(fontSize = inputFontSize, textAlign = TextAlign.Center)
+        
         if (isEditing) {
             BasicTextField(
                 value = expense.count,
@@ -449,21 +452,23 @@ fun CompactHoardItem(
                 modifier = Modifier
                     .weight(1.5f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
+                    .padding(inputPadding),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (expense.count.isEmpty()) {
-                        Text("斤数", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        if (expense.count.isEmpty()) {
+                            Text("斤数", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (expense.count.isEmpty()) "0 斤" else "${expense.count} 斤",
                 modifier = Modifier.weight(1.5f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 color = if (expense.count.isEmpty()) TextGray else Color.Black
             )
@@ -628,6 +633,7 @@ fun CompactSaleItemRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val commonTextStyle = LocalTextStyle.current.copy(fontSize = inputFontSize, textAlign = TextAlign.Center)
             // Name
             if (isEditing) {
                 BasicTextField(
@@ -636,20 +642,22 @@ fun CompactSaleItemRow(
                     modifier = Modifier
                         .weight(1.3f)
                         .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                        .padding(8.dp),
-                    textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                        .padding(inputPadding),
+                    textStyle = commonTextStyle,
                     decorationBox = { innerTextField ->
-                        if (expense.name.isEmpty()) {
-                            Text("名字", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                            if (expense.name.isEmpty()) {
+                                Text("名字", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
                     }
                 )
             } else {
                 Text(
                     text = if (expense.name.isEmpty()) "名字" else expense.name,
                     modifier = Modifier.weight(1.3f),
-                    fontSize = 14.sp,
+                    fontSize = inputFontSize,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                     color = if (expense.name.isEmpty()) TextGray else Color.Black
@@ -664,21 +672,23 @@ fun CompactSaleItemRow(
                     modifier = Modifier
                         .weight(1f)
                         .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                        .padding(8.dp),
+                        .padding(inputPadding),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    textStyle = commonTextStyle,
                     decorationBox = { innerTextField ->
-                        if (expense.count.isEmpty()) {
-                            Text("斤数", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                            if (expense.count.isEmpty()) {
+                                Text("斤数", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
                     }
                 )
             } else {
                 Text(
                     text = if (expense.count.isEmpty()) "0 斤" else "${expense.count} 斤",
                     modifier = Modifier.weight(1f),
-                    fontSize = 14.sp,
+                    fontSize = inputFontSize,
                     textAlign = TextAlign.Center,
                     color = if (expense.count.isEmpty()) TextGray else Color.Black
                 )
@@ -691,6 +701,7 @@ fun CompactSaleItemRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val commonTextStyle = LocalTextStyle.current.copy(fontSize = inputFontSize, textAlign = TextAlign.Center)
             // Unit Price
             if (isEditing) {
                 BasicTextField(
@@ -699,21 +710,23 @@ fun CompactSaleItemRow(
                     modifier = Modifier
                         .weight(1f)
                         .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                        .padding(8.dp),
+                        .padding(inputPadding),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    textStyle = commonTextStyle,
                     decorationBox = { innerTextField ->
-                        if (expense.unitPrice.isEmpty()) {
-                            Text("单价", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                            if (expense.unitPrice.isEmpty()) {
+                                Text("单价", color = TextGray, style = commonTextStyle, modifier = Modifier.fillMaxWidth())
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
                     }
                 )
             } else {
                 Text(
                     text = if (expense.unitPrice.isEmpty()) "¥0" else "¥${expense.unitPrice}",
                     modifier = Modifier.weight(1f),
-                    fontSize = 14.sp,
+                    fontSize = inputFontSize,
                     textAlign = TextAlign.Center,
                     color = if (expense.unitPrice.isEmpty()) TextGray else Color.Black
                 )
@@ -722,16 +735,15 @@ fun CompactSaleItemRow(
             // Total
             val total = (expense.unitPrice.toDoubleOrNull() ?: 0.0) * (expense.count.toDoubleOrNull() ?: 0.0)
             val totalText = if (total == 0.0) "0" else if (total % 1.0 == 0.0) total.toInt().toString() else String.format(Locale.getDefault(), "%.1f", total)
-            val moneyColor = if (total > 0) PrimaryGreen else Color.DarkGray
-            
             Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.weight(1.3f),
+                contentAlignment = Alignment.CenterEnd
             ) {
+                val moneyColor = if (total > 0) PrimaryGreen else Color.DarkGray
                 Text(
                     text = "¥$totalText",
                     color = moneyColor,
-                    fontSize = 15.sp,
+                    fontSize = inputFontSize,
                     fontWeight = FontWeight.Bold,
                 )
             }

@@ -26,8 +26,8 @@ android {
         applicationId = "com.example.navigation3"
         minSdk = 24
         targetSdk = 36
-        versionCode = 100019
-        versionName = "1.0.19"
+        versionCode = 101919
+        versionName = "1.19.19"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +48,13 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        val appName = if (variant.name == "prodRelease") "藕带记账" else "藕带记账-${variant.name}"
+        variant.manifestPlaceholders.put("appName", appName)
     }
 }
 

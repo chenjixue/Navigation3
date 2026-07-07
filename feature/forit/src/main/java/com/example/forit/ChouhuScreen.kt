@@ -37,6 +37,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -47,6 +48,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -84,6 +86,10 @@ import com.example.model.OtherExpenseResource
 import com.example.model.PeopleExpenseResource
 import com.example.model.SaleResource
 import kotlin.random.Random
+
+// 全局常量
+val inputPadding = 4.dp
+val inputFontSize = 14.sp
 
 @Composable
 fun SuppliersScreen(
@@ -145,8 +151,8 @@ fun SuppliersScreen(
                         onSave(supplierItems.map { it.asModel(selectedDate) })
                     }
                 },
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
                 TextField(
@@ -169,32 +175,12 @@ fun SuppliersScreen(
                 val totalChouhuText = if (totalChouhu == 0.0) "0" else if (totalChouhu % 1.0 == 0.0) totalChouhu.toInt().toString() else String.format(Locale.getDefault(), "%.1f", totalChouhu)
                 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("今日抽户列表", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                    Button(
-                        onClick = {
-                            val newItem = SupplierItemUiState(
-                                key = generateUniqueKey(supplierKeys, selectedDate),
-                                name = "",
-                                unitPrice = "",
-                                quantity = "",
-                            )
-                            val updatedList = initialItems.toMutableList()
-                            updatedList.add(newItem.asModel(selectedDate))
-                            keyToEditAfterLoad = newItem.key
-                            onSave(updatedList)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("添加", fontSize = 12.sp, color = Color.White)
+                    Box(modifier = Modifier.background(Color(0xFFE3F2FD), RoundedCornerShape(4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) {
+                        Text("今日抽户列表", color = Color(0xFF1976D2), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -251,6 +237,27 @@ fun SuppliersScreen(
             }
 
             item { Spacer(modifier = Modifier.height(80.dp)) }
+        }
+        
+        FloatingActionButton(
+            onClick = {
+                val newItem = SupplierItemUiState(
+                    key = generateUniqueKey(supplierKeys, selectedDate),
+                    name = "",
+                    unitPrice = "",
+                    quantity = "",
+                )
+                supplierItems.add(newItem)
+                keyToEditAfterLoad = newItem.key
+                onSave(supplierItems.map { it.asModel(selectedDate) })
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = PrimaryGreen,
+            contentColor = Color.White
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Chouhu")
         }
     }
 }
@@ -352,6 +359,8 @@ fun SupplierCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Name
+        val commonTextStyle = LocalTextStyle.current.copy(fontSize = inputFontSize, textAlign = TextAlign.Center)
+        
         if (isEditing) {
             BasicTextField(
                 value = supplier.name,
@@ -359,20 +368,22 @@ fun SupplierCard(
                 modifier = Modifier
                     .weight(1.5f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                    .padding(inputPadding),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (supplier.name.isEmpty()) {
-                        Text("姓名", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center) {
+                        if (supplier.name.isEmpty()) {
+                            Text("姓名", color = TextGray, style = commonTextStyle)
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (supplier.name.isEmpty()) "姓名" else supplier.name,
                 modifier = Modifier.weight(1.5f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 color = if (supplier.name.isEmpty()) TextGray else Color.Black
@@ -387,21 +398,23 @@ fun SupplierCard(
                 modifier = Modifier
                     .weight(1.2f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
+                    .padding(inputPadding),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (supplier.quantity.isEmpty()) {
-                        Text("斤量", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center) {
+                        if (supplier.quantity.isEmpty()) {
+                            Text("斤量", color = TextGray, style = commonTextStyle)
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (supplier.quantity.isEmpty()) "0斤" else "${supplier.quantity}斤",
                 modifier = Modifier.weight(1.2f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 color = if (supplier.quantity.isEmpty()) TextGray else Color.Black
             )
@@ -415,21 +428,23 @@ fun SupplierCard(
                 modifier = Modifier
                     .weight(1f)
                     .background(Color(0xFFF5F5F5), RoundedCornerShape(4.dp))
-                    .padding(8.dp),
+                    .padding(inputPadding),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = TextStyle(fontSize = 14.sp, textAlign = TextAlign.Center),
+                textStyle = commonTextStyle,
                 decorationBox = { innerTextField ->
-                    if (supplier.unitPrice.isEmpty()) {
-                        Text("单价", color = TextGray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    Box(contentAlignment = Alignment.Center) {
+                        if (supplier.unitPrice.isEmpty()) {
+                            Text("单价", color = TextGray, style = commonTextStyle)
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         } else {
             Text(
                 text = if (supplier.unitPrice.isEmpty()) "¥0" else "¥${supplier.unitPrice}",
                 modifier = Modifier.weight(1f),
-                fontSize = 14.sp,
+                fontSize = inputFontSize,
                 textAlign = TextAlign.Center,
                 color = if (supplier.unitPrice.isEmpty()) TextGray else Color.Black
             )
@@ -441,7 +456,7 @@ fun SupplierCard(
             text = "¥$totalText",
             modifier = Modifier.weight(1.5f),
             color = moneyColor,
-            fontSize = 14.sp,
+            fontSize = inputFontSize,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.End
         )
