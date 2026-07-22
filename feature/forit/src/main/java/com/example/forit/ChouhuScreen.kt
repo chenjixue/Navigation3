@@ -3,23 +3,22 @@ package com.example.forit
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,9 +37,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -51,8 +47,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,10 +57,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,6 +84,7 @@ import com.example.model.ChouhuResource
 import com.example.model.OtherExpenseResource
 import com.example.model.PeopleExpenseResource
 import com.example.model.SaleResource
+import kotlin.math.abs
 import kotlin.random.Random
 
 // 全局常量
@@ -271,69 +271,108 @@ fun SwipeToDeleteSupplierItem(
     onDelete: () -> Unit,
 ) {
     val density = LocalDensity.current
-    val minDragDistancePx = with(density) { 120.dp.toPx() }
+    val dismissThresholdPx = with(density) { 120.dp.toPx() }
+    val directionConfirmThresholdPx = with(density) { 15.dp.toPx() }
+    val autoDeleteThresholdPx = with(density) { 50.dp.toPx() }
+    val dragFactor = 0.5f
 
-    class StateHolder {
-        var state: SwipeToDismissBoxState? = null
-    }
-    val holder = remember { StateHolder() }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var dragDirectionConfirmed by remember { mutableStateOf(false) }
+    var hasTriggeredDelete by remember { mutableStateOf(false) }
 
-    val dismissState = rememberSwipeToDismissBoxState(
-        // Require a clear swipe distance before confirming delete.
-        positionalThreshold = { totalDistance -> totalDistance * 0.6f },
-        confirmValueChange = { dismissValue ->
-            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                val offset = try {
-                    holder.state?.requireOffset() ?: 0f
-                } catch (e: Exception) {
-                    0f
-                }
-                
-                // For EndToStart, offset is negative. We require dragging at least 120dp
-                if (offset > -minDragDistancePx) {
-                    return@rememberSwipeToDismissBoxState false
-                }
-                
-                onDelete()
-                true
-            } else {
-                false
-            }
-        },
-    )
-    holder.state = dismissState
-
-    SwipeToDismissBox(
-        state = dismissState,
-        enableDismissFromStartToEnd = false,
-        backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFD32F2F), RoundedCornerShape(12.dp))
-                    .padding(horizontal = 20.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text("删除", color = Color.White, fontWeight = FontWeight.Bold)
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "删除抽户",
-                        tint = Color.White,
-                    )
-                }
-            }
-        },
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
     ) {
-        SupplierCard(
-            supplier = supplier,
-            isEditing = isEditing,
-            onClick = onClick,
-            onValueChange = onValueChange,
-        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color(0xFFD32F2F))
+                .padding(horizontal = 20.dp),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("删除", color = Color.White, fontWeight = FontWeight.Bold)
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "删除抽户",
+                    tint = Color.White,
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(x = offsetX.dp)
+                .pointerInput(Unit) {
+                    var totalDragX = 0f
+                    var totalDragY = 0f
+
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        totalDragX = 0f
+                        totalDragY = 0f
+                        hasTriggeredDelete = false
+                        dragDirectionConfirmed = false
+
+                        do {
+                            val event = awaitPointerEvent()
+                            val changes = event.changes
+
+                            if (changes.size == 1) {
+                                val change = changes.first()
+                                val dragX = change.position.x - change.previousPosition.x
+                                val dragY = change.position.y - change.previousPosition.y
+
+                                totalDragX += dragX
+                                totalDragY += dragY
+
+                                val absTotalX = abs(totalDragX)
+                                val absTotalY = abs(totalDragY)
+
+                                if (!dragDirectionConfirmed) {
+                                    if (absTotalX > directionConfirmThresholdPx || absTotalY > directionConfirmThresholdPx) {
+                                        if (absTotalX > absTotalY) {
+                                            dragDirectionConfirmed = true
+                                            change.consume()
+                                        } else {
+                                            break
+                                        }
+                                    }
+                                } else {
+                                    val newOffset = offsetX + dragX * dragFactor
+                                    offsetX = newOffset.coerceIn(-dismissThresholdPx, 0f)
+                                    change.consume()
+
+                                    if (!hasTriggeredDelete && offsetX < -autoDeleteThresholdPx) {
+                                        hasTriggeredDelete = true
+                                        onDelete()
+                                        offsetX = 0f
+                                        break
+                                    }
+                                }
+                            }
+                        } while (changes.any { it.pressed } && !hasTriggeredDelete)
+
+                        if (!hasTriggeredDelete && dragDirectionConfirmed) {
+                            offsetX = 0f
+                        }
+                        dragDirectionConfirmed = false
+                    }
+                }
+        ) {
+            SupplierCard(
+                supplier = supplier,
+                isEditing = isEditing,
+                onClick = onClick,
+                onValueChange = onValueChange,
+            )
+        }
     }
 }
 

@@ -1,0 +1,6 @@
+---
+description: 
+alwaysApply: true
+---
+
+- 每次更改代码完成后都用lint 检查下，有错误继续进行修改直到没有错误为止
