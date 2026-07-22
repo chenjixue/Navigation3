@@ -26,8 +26,8 @@ android {
         applicationId = "com.example.navigation3"
         minSdk = 24
         targetSdk = 36
-        versionCode = 101919
-        versionName = "1.19.19"
+        versionCode = 101920
+        versionName = "1.19.20"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
